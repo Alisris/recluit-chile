@@ -1,0 +1,1063 @@
+function BindState(){
+    CheckState();
+    $('#state').change(function(){
+        CheckState();
+    });
+}
+
+function CheckState(){
+    if ($('#state').val() == 0) {
+        $('#UserCareer_endDate').hide();
+        $('#UserCareer_endMonth').prop('required', false);
+        $('#UserCareer_endYear').prop('required', false);
+    }else{
+        $('#UserCareer_endDate').show();
+        $('#UserCareer_endMonth').prop('required', true);
+        $('#UserCareer_endYear').prop('required', true);
+    }
+}
+function BindStateMiniCv(){
+    CheckStateMiniCv();
+    $('#userCareerState').change(function(){
+        CheckStateMiniCv();
+    });
+}
+
+function CheckStateMiniCv(){
+    if ($('#userCareerState').val() == 0) {
+        $('#UserCareer_endDate').hide();
+        $('#MiniCv_userCareer_endMonth').prop('required', false);
+        $('#MiniCv_userCareer_endYear').prop('required', false);
+    }else{
+        $('#UserCareer_endDate').show();
+        $('#MiniCv_userCareer_endMonth').prop('required', true);
+        $('#MiniCv_userCareer_endYear').prop('required', true);
+    }
+}
+
+
+function CheckCurrent(){
+    if($('#UserJob_current_1').parent().hasClass('active')){
+        $('#UserJob_endDate').hide();
+        $('#UserJob_endYear').prop('required', false);
+        $('#UserJob_endMonth').prop('required', false);
+    }else{
+        $('#UserJob_endDate').show();
+        $('#UserJob_endYear').prop('required', true);
+        $('#UserJob_endMonth').prop('required', true);
+    }
+}
+
+function BindCurrent(){
+    $('#UserJob_current_1').parent().click(function(){
+        $('#UserJob_endDate').hide();
+        $('#UserJob_endYear').prop('required', false);
+        $('#UserJob_endMonth').prop('required', false);
+    });
+    $('#UserJob_current_0').parent().click(function(){
+        $('#UserJob_endDate').show();
+        $('#UserJob_endYear').prop('required', true);
+        $('#UserJob_endMonth').prop('required', true);
+    });
+}
+
+function BindPostgraduareState(){
+    CheckPostgraduateState();
+    $('#postgraduateState').change(function(){
+        CheckPostgraduateState();
+    });
+}
+
+function CheckPostgraduateState(){
+    if ($('#postgraduateState').val() == 1) {
+        $('#UserPostgraduate_endDate').hide();
+        $('#UserPostgraduate_endYear').prop('required', false);
+    }else{
+        $('#UserPostgraduate_endDate').show();
+        $('#UserPostgraduate_endYear').prop('required', true);
+    }
+}
+
+function ShowJobForm(userJobId){
+    var url;
+    if(!userJobId){
+        url = Routing.generate('user_account_job_form');
+    }else{
+        url = Routing.generate('user_account_job_form', { userJobId : userJobId });
+    }
+    CleanModal();
+    var mainModal = new bootstrap.Modal(document.getElementById('main_modal'), {
+        keyboard: true
+    });
+    mainModal.handleUpdate();
+    mainModal.show();
+    $.ajax({
+        url: url,
+        type: "GET",
+        success: function(response) {
+            RenderModal(response);
+            InitializeCompanies('UserJob');
+            InitializeJobTitles('UserJob');
+            CheckCurrent();
+            BindCurrent();
+            $('#UserJob_title').focus();
+        }
+    });
+}
+
+function InitializeCompanies(entity){
+    var companies = new Bloodhound({
+        datumTokenizer: Bloodhound.tokenizers.obj.whitespace('name'),
+        queryTokenizer: Bloodhound.tokenizers.whitespace,
+        remote: Routing.generate('core_main_get_companies')+'?term=%QUERY'
+    });
+
+    companies.initialize();
+
+    var input = $('#'+entity+'_companyName');
+    input.typeahead({
+            hint: true,
+            highlight: true,
+            minLength: 2
+        },
+        {
+            name: 'companies',
+            displayKey: 'name',
+            source: companies.ttAdapter(),
+            templates: {
+                empty: function(data){
+                    return '<div class="empty-message" onclick="$(this).parent().parent().hide();">Crear <strong>'+data.query+'</strong><br /><span class="ta-hint">(Te recomendamos elegir una de las opciones)</span></div>';
+                },
+                suggestion: function(data){
+                    return '<img class="thumb-uni" src="//reqlut2.s3.amazonaws.com/uploads/logos/'+ data.photo +'" /><strong>' + data.name + '</strong><div class="clearfix"></div>';
+                }
+            }
+        }
+    );
+    MainCheckCompany(entity);
+
+    input.focusout(function() {
+        MainCheckCompany(entity);
+    });
+}
+
+function InitializeJobTitles(entity){
+    var jobTitles = new Bloodhound({
+        datumTokenizer: Bloodhound.tokenizers.obj.whitespace('name'),
+        queryTokenizer: Bloodhound.tokenizers.whitespace,
+        remote: Routing.generate('core_main_get_job_titles')+'?term=%QUERY'
+    });
+
+    jobTitles.initialize();
+
+    $('#'+entity+'_title').typeahead({
+            hint: true,
+            highlight: true,
+            minLength: 2
+        },
+        {
+            name: 'jobTitles',
+            displayKey: 'name',
+            source: jobTitles.ttAdapter()
+        }
+    );
+}
+
+
+function ShowCareerForm(careerId, universityId){
+    var url;
+    if(!careerId || !universityId){
+        url = Routing.generate('user_account_career_form');
+    }else{
+        url = Routing.generate('user_account_career_form', { careerId: careerId, universityId: universityId });
+    }
+    CleanModal();
+    var mainModal = new bootstrap.Modal(document.getElementById('main_modal'), {
+        keyboard: true
+    });
+    mainModal.handleUpdate();
+    mainModal.show();
+    $.ajax({
+        url: url,
+        type: "GET",
+        success: function(response) {
+            RenderModal(response);
+            InitializeCareers('UserCareer');
+            InitializeUniversities('UserCareer');
+            BindState();
+            $('#UserCareer_universityName').focus();
+        }
+    });
+}
+
+function InitializeCareers(entity){
+    var careers = new Bloodhound({
+        datumTokenizer: Bloodhound.tokenizers.obj.whitespace('name'),
+        queryTokenizer: Bloodhound.tokenizers.whitespace,
+        remote: Routing.generate('core_main_get_careers')+'?term=%QUERY'
+    });
+
+    careers.initialize();
+
+    $('#'+entity+'_careerName').typeahead({
+            hint: true,
+            highlight: true,
+            minLength: 2
+        },
+        {
+            name: 'careers',
+            displayKey: 'name',
+            source: careers.ttAdapter()
+        }
+    );
+}
+
+function InitializeUniversities(entity){
+    var universities = new Bloodhound({
+        datumTokenizer: Bloodhound.tokenizers.obj.whitespace('name'),
+        queryTokenizer: Bloodhound.tokenizers.whitespace,
+        remote: {
+            url: Routing.generate('core_main_get_universities') + '?term=%QUERY',
+            wildcard: '%QUERY',
+            replace: function(url, query) {
+                var country_id = $('#' + entity + '_country').val();
+                if (!country_id) {
+                    // No hacemos la petición si no hay país seleccionado
+                    return null;
+                }
+                var newUrl = url.replace('%QUERY', encodeURIComponent(query));
+                newUrl += '&country_id=' + encodeURIComponent(country_id);
+                return newUrl;
+            },
+            cache: false // Desactivamos el caché para asegurar nuevas solicitudes
+        }
+    });
+
+    universities.initialize();
+
+    var input = $('#' + entity + '_universityName');
+
+    // Deshabilitamos el campo de universidad inicialmente
+    if (!$('#' + entity + '_country').val()) {
+        input.prop('disabled', true);
+    }
+
+    // Habilitamos o deshabilitamos el campo de universidad cuando cambia el país
+    $('#' + entity + '_country').change(function() {
+        if ($(this).val()) {
+            input.prop('disabled', false);
+        } else {
+            input.prop('disabled', true);
+            input.typeahead('val', ''); // Limpiamos el valor del input
+        }
+    });
+
+    input.typeahead({
+            hint: true,
+            highlight: true,
+            minLength: 5 // Establecemos el mínimo a 5 caracteres
+        },
+        {
+            name: 'universities',
+            displayKey: 'name',
+            source: function(query, syncResults, asyncResults) {
+                var country_id = $('#' + entity + '_country').val();
+                if (!country_id) {
+                    // No hacemos la búsqueda si no hay país seleccionado
+                    syncResults([]);
+                    return;
+                }
+                if (query.length >= 5) {
+                    universities.ttAdapter()(query, function(suggestions) {
+                        // Agregamos la opción de crear nueva universidad al final
+                        suggestions.push({name: query, createNew: true});
+                        syncResults(suggestions);
+                    });
+                } else {
+                    // Si hay menos de 5 caracteres, no mostramos sugerencias
+                    syncResults([]);
+                }
+            },
+            templates: {
+                suggestion: function(data){
+                    if(data.createNew){
+                        return '<div class="create-new">Crear <strong>' + data.name + '</strong><br /><span class="ta-hint">(Te recomendamos elegir una de las opciones)</span></div>';
+                    } else {
+                        return '<strong>' + data.name + '</strong><div class="clearfix"></div>';
+                    }
+                },
+                notFound: function(query) {
+                    if (query.query.length >= 5) {
+                        return '<div class="no-results">No se encontraron resultados para "' + query.query + '".</div>';
+                    }
+                    return '';
+                }
+            }
+        }
+    );
+
+    // Manejadores de eventos para actualizar el campo de país (no modificamos el país)
+    input.bind('typeahead:selected typeahead:autocompleted', function(evt, data) {
+        // No hacemos nada con el país
+    });
+
+    // Manejo del evento focusout para verificar la universidad (opcional)
+    input.focusout(function() {
+        MainCheckUniversity(entity);
+    });
+}
+
+function ShowSchoolForm(userSchoolId){
+    var url;
+    if(!userSchoolId){
+        url = Routing.generate('user_account_school_form');
+    }else{
+        url = Routing.generate('user_account_school_form', { userSchoolId : userSchoolId });
+    }
+    CleanModal();
+    var mainModal = new bootstrap.Modal(document.getElementById('main_modal'), {
+        keyboard: true
+    });
+    mainModal.handleUpdate();
+    mainModal.show();
+    $.ajax({
+        url:   url,
+        type:  "GET",
+        success:  function(response) {
+            RenderModal(response);
+            InitializeSchools('UserSchool');
+            $('#UserSchool_name').focus();
+        }
+    });
+}
+
+function ShowScholarshipInfoForm(){
+    CleanModal();
+    var mainModal = new bootstrap.Modal(document.getElementById('main_modal'), {
+        keyboard: true
+    });
+    mainModal.handleUpdate();
+    mainModal.show();
+    $.ajax({
+        url:   Routing.generate('user_account_scholarship_info_form'),
+        type:  "GET",
+        success:  function(response) {
+            RenderModal(response);
+            $('#document_name').focus();
+        }
+    });
+}
+
+function InitializeSchools(entity){
+    var schools = new Bloodhound({
+        datumTokenizer: Bloodhound.tokenizers.obj.whitespace('name'),
+        queryTokenizer: Bloodhound.tokenizers.whitespace,
+        remote: Routing.generate('core_main_get_schools')+'?term=%QUERY'
+    });
+
+    schools.initialize();
+
+    $('#'+entity+'_name').typeahead({
+            hint: true,
+            highlight: true,
+            minLength: 2
+        },
+        {
+            name: 'schools',
+            displayKey: 'name',
+            source: schools.ttAdapter()
+        }
+    );
+}
+
+
+function ShowPostgraduateForm(userPostgraduateId){
+    var url;
+    if(!userPostgraduateId){
+        url = Routing.generate('user_account_postgraduate_form');
+    }else{
+        url = Routing.generate('user_account_postgraduate_form', { userPostgraduateId : userPostgraduateId });
+    }
+    CleanModal();
+    var mainModal = new bootstrap.Modal(document.getElementById('main_modal'), {
+        keyboard: true
+    });
+    mainModal.handleUpdate();
+    mainModal.show();
+    $.ajax({
+        url:   url,
+        type:  "GET",
+        success:  function(response) {
+            RenderModal(response);
+            BindPostgraduareState();
+            InitializePostgraduates('UserPostgraduate');
+            InitializeUniversitiesPostgraduate('UserPostgraduate');
+            $('#UserPostgraduate_country').focus();
+        }
+    });
+}
+
+function InitializePostgraduates(entity){
+    var schools = new Bloodhound({
+        datumTokenizer: Bloodhound.tokenizers.obj.whitespace('name'),
+        queryTokenizer: Bloodhound.tokenizers.whitespace,
+        remote: Routing.generate('core_main_get_postgraduates')+'?term=%QUERY'
+    });
+
+    schools.initialize();
+
+    $('#'+entity+'_name').typeahead({
+            hint: true,
+            highlight: true,
+            minLength: 2
+        },
+        {
+            name: 'postgraduates',
+            displayKey: 'name',
+            source: schools.ttAdapter()
+        }
+    );
+}
+
+function InitializeUniversitiesPostgraduate(entity){
+    var institutions = new Bloodhound({
+        datumTokenizer: Bloodhound.tokenizers.obj.whitespace('name'),
+        queryTokenizer: Bloodhound.tokenizers.whitespace,
+        remote: Routing.generate('core_main_get_universities')+'?term=%QUERY'
+    });
+
+    institutions.initialize();
+
+    $('#'+entity+'_institution').typeahead({
+            hint: true,
+            highlight: true,
+            minLength: 2
+        },
+        {
+            name: 'institutions',
+            displayKey: 'name',
+            source: institutions.ttAdapter(),
+            templates: {
+                empty: function(data){
+                    return '<div class="empty-message" onclick="$(this).parent().parent().hide();">Crear <strong>'+data.query+'</strong><br /><span class="ta-hint">(Te recomendamos elegir una de las opciones)</span></div>';
+                },
+                suggestion: function(data){
+                    return '<strong>' + data.name + '</strong><div class="clearfix"></div>';
+                }
+            }
+        }
+    );
+}
+
+function ShowAdditionalInfoForm(userAdditionalInfoId, infoType = 1){
+    var url;
+    if(!userAdditionalInfoId){
+        url = Routing.generate('user_account_additional_form', {userAdditionalInfoId : 0, infoType : infoType});
+    }else{
+        url = Routing.generate('user_account_additional_form', { userAdditionalInfoId : userAdditionalInfoId, infoType : infoType });
+    }
+    CleanModal();
+    var mainModal = new bootstrap.Modal(document.getElementById('main_modal'), {
+        keyboard: true
+    });
+    mainModal.handleUpdate();
+    mainModal.show();
+    $.ajax({
+        url:   url,
+        type:  "GET",
+        success:  function(response) {
+            RenderModal(response);
+            $('#userAdditionalInfo_title').focus();
+        }
+    });
+}
+
+
+function ShowLanguageForm(){
+    CleanModal();
+    var mainModal = new bootstrap.Modal(document.getElementById('main_modal'), {
+        keyboard: true
+    });
+    mainModal.handleUpdate();
+    mainModal.show();
+    $.ajax({
+        url:   Routing.generate('user_account_language_form'),
+        type:  "GET",
+        success:  function(response) {
+            RenderModal(response);
+            $('#UserLanguage_language').focus();
+        }
+    });
+}
+
+
+function ShowHabilityForm(){
+    CleanModal();
+    var mainModal = new bootstrap.Modal(document.getElementById('main_modal'), {
+        keyboard: true
+    });
+    mainModal.handleUpdate();
+    mainModal.show();
+    $.ajax({
+        url:   Routing.generate('user_account_hability_form'),
+        type:  "GET",
+        success:  function(response) {
+            RenderModal(response);
+            InitializeHabilities('UserHability');
+            $('#UserHability_habilityName').focus();
+        }
+    });
+}
+
+
+function InitializeHabilities(entity){
+    var habilities = new Bloodhound({
+        datumTokenizer: Bloodhound.tokenizers.obj.whitespace('name'),
+        queryTokenizer: Bloodhound.tokenizers.whitespace,
+        remote: Routing.generate('core_main_get_habilities')+'?term=%QUERY'
+    });
+
+    habilities.initialize();
+
+    var input = $('#'+entity+'_habilityName');
+    input.typeahead({
+            hint: true,
+            highlight: true,
+            minLength: 2
+        },
+        {
+            name: 'habilities',
+            displayKey: 'name',
+            source: habilities.ttAdapter(),
+            templates: {
+                empty: function(data){
+                    return '<div class="empty-message" onclick="$(this).parent().parent().hide();">Crear <strong>'+data.query+'</strong><br /><span class="ta-hint">(Te recomendamos elegir una de las opciones)</span></div>';
+                },
+                suggestion: function(data){
+                    return '<strong>' + data.name + '</strong><div class="clearfix"></div>';
+                }
+            }
+        }
+    );
+
+    input.focusout(function() {
+        MainCheckHability(entity);
+    });
+}
+
+function ShowQuestionTest(x){
+    document.getElementById('q_1').style.display = 'none';
+    document.getElementById('q_2').style.display = 'none';
+    document.getElementById('q_3').style.display = 'none';
+    document.getElementById('q_4').style.display = 'none';
+    document.getElementById('q_5').style.display = 'none';
+    document.getElementById('q_6').style.display = 'none';
+    document.getElementById('q_7').style.display = 'none';
+    document.getElementById('q_8').style.display = 'none';
+    document.getElementById('q_9').style.display = 'none';
+    document.getElementById('q_10').style.display = 'none';
+    document.getElementById('q_11').style.display = 'none';
+    document.getElementById('q_12').style.display = 'none';
+    document.getElementById('q_13').style.display = 'none';
+    document.getElementById('q_14').style.display = 'none';
+    document.getElementById('q_15').style.display = 'none';
+    document.getElementById('q_16').style.display = 'none';
+    document.getElementById('q_17').style.display = 'none';
+    document.getElementById('q_18').style.display = 'none';
+    document.getElementById('q_19').style.display = 'none';
+    document.getElementById('q_20').style.display = 'none';
+    document.getElementById('q_21').style.display = 'none';
+
+    document.getElementById('q_'+x).style.display = 'block';
+}
+
+function ChangePortfolioItemType(type){
+    $('#portfolioType .active').removeClass('active');
+    $('#type' + type).addClass('active');
+    if(type == 0){
+        $('#video-type').hide('visually-hidden');
+        $('#video-input').prop('required', false);
+
+        $('#url-type').addClass('visually-hidden');
+        $('#url-input').prop('required', false);
+
+        $('#image-type').removeClass('visually-hidden');
+        $('#image-input').prop('required', true);
+    }else if(type == 3) {
+        $('#url-type').removeClass('visually-hidden');
+        $('#url-input').prop('required', true);
+
+        $('#video-type').addClass('visually-hidden');
+        $('#video-input').prop('required', false);
+
+        $('#image-type').addClass('visually-hidden');
+        $('#image-input').prop('required', false);
+    }else{
+        $('#video-type').removeClass('visually-hidden');
+        $('#video-input').prop('required', true);
+
+        $('#url-type').addClass('visually-hidden');
+        $('#url-input').prop('required', false);
+
+        $('#image-type').addClass('visually-hidden');
+        $('#image-input').prop('required', false);
+    }
+}
+
+function ShowItemPortfolioForm(itemId){
+    var url;
+    if(!itemId){
+        url = Routing.generate('user_account_item_portfolio_form');
+    }else{
+        url = Routing.generate('user_account_item_portfolio_form', { itemId : itemId });
+    }
+    CleanModal();
+    var mainModal = new bootstrap.Modal(document.getElementById('main_modal'), {
+        keyboard: true
+    });
+    mainModal.handleUpdate();
+    mainModal.show();
+    $.ajax({
+        url:   url,
+        type:  "GET",
+        success:  function(response) {
+            RenderModal(response);
+        }
+    });
+}
+
+function ShowMicroCompanyItemPortfolioForm(companyId, itemId){
+    var url;
+    if(!itemId){
+        url = Routing.generate('market_account_company_item_portfolio', {'companyId' : companyId});
+    }else{
+        url = Routing.generate('market_account_company_item_portfolio', {'companyId' : companyId, 'itemId' : itemId});
+    }
+    CleanModal();
+    var mainModal = new bootstrap.Modal(document.getElementById('main_modal'), {
+        keyboard: true
+    });
+    mainModal.handleUpdate();
+    mainModal.show();
+    $.ajax({
+        url:   url,
+        type:  "GET",
+        success:  function(response) {
+            RenderModal(response);
+        }
+    });
+}
+
+function ShowCompanyVideoForm(videoId){
+    var url;
+    if(!videoId){
+        url = Routing.generate('faire_companies_virtual_videos_form');
+    }else{
+        url = Routing.generate('faire_companies_virtual_videos_form', { videoId : videoId });
+    }
+    CleanModal();
+    var mainModal = new bootstrap.Modal(document.getElementById('main_modal'), {
+        keyboard: true
+    });
+    mainModal.handleUpdate();
+    mainModal.show();
+    $.ajax({
+        url:   url,
+        type:  "GET",
+        success:  function(response) {
+            RenderModal(response);
+        }
+    });
+}
+
+function ShowCompanyTestimonyForm(testimonyId){
+    var url;
+    if(!testimonyId){
+        url = Routing.generate('faire_companies_virtual_testimonies_form');
+    }else{
+        url = Routing.generate('faire_companies_virtual_testimonies_form', { testimonyId : testimonyId });
+    }
+    CleanModal();
+    var mainModal = new bootstrap.Modal(document.getElementById('main_modal'), {
+        keyboard: true
+    });
+    mainModal.handleUpdate();
+    mainModal.show();
+    $.ajax({
+        url:   url,
+        type:  "GET",
+        success:  function(response) {
+            RenderModal(response);
+        }
+    });
+}
+
+function OpenAnswerPreferences(){
+    CleanModal();
+    var mainModal = new bootstrap.Modal(document.getElementById('main_modal'), {
+        keyboard: true
+    });
+    mainModal.handleUpdate();
+    mainModal.show();
+    $.ajax({
+        url:   Routing.generate('user_account_answer_preferences'),
+        type:  "GET",
+        success:  function(response) {
+            RenderModal(response);
+            //$('#jobOfferType_*').first().focus();
+        }
+    });
+}
+
+function OpenAddJobAlert(){
+    CleanModal();
+    var mainModal = new bootstrap.Modal(document.getElementById('main_modal'), {
+        keyboard: true
+    });
+    mainModal.handleUpdate();
+    mainModal.show();
+    $.ajax({
+        url:   Routing.generate('user_account_add_job_alert'),
+        type:  "GET",
+        success:  function(response) {
+            RenderModal(response);
+        }
+    });
+}
+
+function ShowDisabilitiesForm(){
+    CleanModal();
+    var mainModal = new bootstrap.Modal(document.getElementById('main_modal'), {
+        keyboard: true
+    });
+    mainModal.handleUpdate();
+    mainModal.show();
+    $.ajax({
+        url: Routing.generate('user_account_disabilities_form'),
+        type: 'GET',
+        success:  function(response) {
+            RenderModal(response);
+
+            $('#hasDisability').focus();
+            $('#hasDisability').change(function(){
+                var value = $(this).val();
+                if(value == '1'){
+                    $('#userDisabilities').show();
+                }else{
+                    $('#userDisabilities').hide();
+                }
+            });
+        }
+    });
+}
+
+function ShowEntrepreunshipForm(){
+    CleanModal();
+    var mainModal = new bootstrap.Modal(document.getElementById('main_modal'), {
+        keyboard: true
+    });
+    mainModal.handleUpdate();
+    mainModal.show();
+    $.ajax({
+        url: Routing.generate('user_account_entrepreneurship_form'),
+        type: 'GET',
+        success:  function(response) {
+            RenderModal(response);
+            $('#hasEntrepreneurship').focus();
+            $('#hasEntrepreneurship').change(function(){
+                var value = $(this).val();
+                if(value == '1'){
+                    $('#entrepreneurshipStartYearContainer').show();
+                    $('#entrepreneurshipStartYear').attr('required','required');
+                    $('#entrepreneurshipSectorContainer').show();
+                    $('#entrepreneurshipSector').attr('required','required');
+                    $('#wouldEntrepreneurshipContainer').hide();
+                    $('#wouldEntrepreneurship').attr('required',false);
+                }else{
+                    $('#entrepreneurshipStartYearContainer').hide();
+                    $('#entrepreneurshipStartYear').attr('required',false);
+                    $('#entrepreneurshipSectorContainer').hide();
+                    $('#entrepreneurshipSector').attr('required',false);
+                    $('#wouldEntrepreneurshipContainer').show();
+                    $('#wouldEntrepreneurship').attr('required','required');
+                }
+            });
+
+            $('#wouldEntrepreneurship').change(function(){
+                var value = $(this).val();
+                if(value == '1'){
+                    $('#entrepreneurshipSectorContainer').show();
+                    $('#entrepreneurshipSector').attr('required','required');
+                }else{
+                    $('#entrepreneurshipSectorContainer').hide();
+                    $('#entrepreneurshipSector').attr('required',false);
+                }
+            });
+        }
+    });
+}
+
+function NationalityChanged(nationalityId, countryId){
+    var hasWorkPermit = $('#hasWorkPermit');
+    var hasWorkPermitGroup = hasWorkPermit.closest('div');
+    var workPermitDueYears = $('#workPermitDueYears');
+    var workPermitDueYearsGroup = workPermitDueYears.closest('div');
+    if(parseInt(nationalityId) == parseInt(countryId)) {
+        hasWorkPermit.val(1);
+        hasWorkPermitGroup.hide();
+        workPermitDueYears.val(-1);
+        workPermitDueYearsGroup.hide();
+    }else{
+        hasWorkPermitGroup.show();
+        hasWorkPermit.attr('required','required');
+        HasWorkPermitChanged(hasWorkPermit.val());
+    }
+}
+
+function HasWorkPermitChanged(value){
+    var workPermitDueYears = $('#workPermitDueYears');
+    var workPermitDueYearsGroup = workPermitDueYears.closest('div');
+    if(value == 1){
+        workPermitDueYearsGroup.show();
+        workPermitDueYears.attr('required','required');
+    }else{
+        workPermitDueYears.val(-1);
+        workPermitDueYearsGroup.hide();
+    }
+}
+
+function OpenStudentCompanyPreference(portalSub){
+    CleanModal();
+    var mainModal = new bootstrap.Modal(document.getElementById('main_modal'), {
+        keyboard: true
+    });
+    mainModal.handleUpdate();
+    mainModal.show();
+    $.ajax({
+        url:   Routing.generate('user_account_internship_company_preferences', {'portalSub' : portalSub}),
+        type:  "GET",
+        success:  function(response) {
+            RenderModal(response);
+        }
+    });
+}
+
+function addInternshipCompanyPreference() {
+    var data = { companyId : $('#idCompanyPreference').val(), portalSub : $('#idPortalSub').val() };
+    $.ajax({
+        url: Routing.generate('user_account_internship_add_company_preferences'),
+        type: "POST",
+        data: data,
+        success: function(response) {
+            if(response.added) {
+                loadCompanyPreferences();
+                $("#idCompanyPreference option[value='" + $('#idCompanyPreference').val() +"']").remove();
+                if(!$('#idCompanyPreference option').length)
+                    $('#addNewCompanyPreference').hide();
+
+                flashMessages({'type': 'success', 'message': 'Compañía Agregada correctamente' });
+            }
+            else{
+                flashMessages({'type': 'error', 'message': 'Compañía no pudo ser agregada' });
+            }
+        }
+    });
+}
+
+
+function MoveCompanyPreference(company, position, newPosition) {
+    $.ajax({
+        url: Routing.generate('user_account_internship_move_company_preferences', { company : company, position : position, newPosition : newPosition }),
+        type: "GET",
+        success: function(response) {
+            if(response.moved) {
+                loadCompanyPreferences();
+                flashMessages({'type': 'success', 'message': 'Preferencia actualizada correctamente' });
+            }
+            else{
+                flashMessages({'type': 'error', 'message': 'Preferencia no pudo ser actualizada' });
+            }
+        }
+    });
+}
+
+function DeleteCompanyPreference(company) {
+    $.ajax({
+        url: Routing.generate('user_account_internship_delete_company_preferences', { company : company }),
+        type: "GET",
+        success: function(response) {
+            if(response.updated) {
+                flashMessages({'type': 'success', 'message': 'Preferencia borrada correctamente' });
+                if($('#addNewCompanyPreference').length && $('#idCompanyPreference option').length)
+                    loadCompanyPreferences();
+                else
+                    OpenStudentCompanyPreference(response.portalSub);
+
+            }
+            else{
+                flashMessages({'type': 'error', 'message': 'Preferencia no pudo ser borrada' });
+            }
+        }
+    });
+}
+
+function addInternshipPreference(application, portalSub) {
+    var data = { applicationId : application, portalSub : portalSub };
+    $.ajax({
+        url: Routing.generate('user_account_internship_add_preferences'),
+        type: "POST",
+        data: data,
+        success: function(response) {
+            if(response.added) {
+                $("#idApplication" + application).hide();
+                loadPreferences();
+                flashMessages({'type': 'success', 'message': 'Oferta priorizada correctamente' });
+            }
+            else{
+                flashMessages({'type': 'error', 'message': 'Oferta no pudo ser agregada' });
+            }
+        }
+    });
+}
+
+function MoveInternshipPreference(application, position, newPosition) {
+    $.ajax({
+        url: Routing.generate('user_account_internship_move_preferences', { applicationId : application, position : position, newPosition : newPosition }),
+        type: "GET",
+        success: function(response) {
+            if(response.moved) {
+                loadPreferences();
+                flashMessages({'type': 'success', 'message': 'Preferencia actualizada correctamente' });
+            }
+            else{
+                flashMessages({'type': 'error', 'message': 'Preferencia no pudo ser actualizada' });
+            }
+        }
+    });
+}
+
+function DeleteInternshipPreference(application, portalSub) {
+    $.ajax({
+        url: Routing.generate('user_account_internship_delete_preferences', { applicationId : application, portalSub: portalSub }),
+        type: "GET",
+        success: function(response) {
+            if(response.updated) {
+                loadPreferences();
+                flashMessages({'type': 'success', 'message': 'Preferencia borrada correctamente' });
+            }
+            else{
+                flashMessages({'type': 'error', 'message': 'Preferencia no pudo ser borrada' });
+            }
+        }
+    });
+}
+
+function senMessageCompany(interview, message) {
+    var data = { interviewId : interview, message : message };
+    $.ajax({
+        url: Routing.generate('user_account_applications_interviews_send_message'),
+        type: "POST",
+        data: data,
+        success: function(response) {
+            if(response.sent) {
+                $("#divInterviewMessage").hide();
+                flashMessages({'type': 'success', 'message': 'Mensaje enviado correctamente' });
+            }
+            else{
+                flashMessages({'type': 'error', 'message': 'Mensaje no pudo ser enviado' });
+            }
+        }
+    });
+}
+
+function OpenContactNetworking(userId, userConfig, networkingType, isUser){
+    CleanModal();
+    $.ajax({
+        url: Routing.generate('user_networking_new_contact', { 'userId' : userId, 'userConfig' : userConfig, 'typeId' : networkingType, 'isUser' : isUser }),
+        type: "GET",
+        success: function (response) {
+            RenderModal(response);
+            var mainModal = new bootstrap.Modal(document.getElementById('main_modal'), {
+                keyboard: true
+            });
+            mainModal.handleUpdate();
+            mainModal.show();
+        },
+        error: function(xhr, status, error) {
+            console.log(xhr.responseText);
+        }
+    });
+}
+
+function OpenReportContactNetworking(contactId, networkingType){
+    CleanModal();
+    $.ajax({
+        url: Routing.generate('user_networking_contact_report', { 'contactId' : contactId, 'typeId' : networkingType }),
+        type: "GET",
+        success: function (response) {
+            RenderModal(response);
+            var mainModal = new bootstrap.Modal(document.getElementById('main_modal'), {
+                keyboard: true
+            });
+            mainModal.handleUpdate();
+            mainModal.show();
+        },
+        error: function(xhr, status, error) {
+            console.log(xhr.responseText);
+        }
+    });
+}
+
+function OpenRejectContactNetworking(contactId, networkingType){
+    CleanModal();
+    $.ajax({
+        url: Routing.generate('user_networking_contact_reject', { 'contactId' : contactId, 'typeId' : networkingType }),
+        type: "GET",
+        success: function (response) {
+            RenderModal(response);
+            var mainModal = new bootstrap.Modal(document.getElementById('main_modal'), {
+                keyboard: true
+            });
+            mainModal.handleUpdate();
+            mainModal.show();
+        },
+        error: function(xhr, status, error) {
+            console.log(xhr.responseText);
+        }
+    });
+}
+
+function OpenNetworkingUserProfile(userId, hash){
+    CleanModal();
+    $.ajax({
+        url: Routing.generate('user_networking_contact_see_profile', { 'userId' : userId, 'hash' : hash }),
+        type: "GET",
+        success: function (response) {
+            RenderModal(response);
+            var mainModal = new bootstrap.Modal(document.getElementById('main_modal'), {
+                keyboard: true
+            });
+            mainModal.handleUpdate();
+            mainModal.show();
+        },
+        error: function(xhr, status, error) {
+            console.log(xhr.responseText);
+        }
+    });
+}
+
+function RecoveryUsernameForm(){
+    CleanModal();
+    $.ajax({
+        url:   Routing.generate('user_account_recovery_username'),
+        type:  "GET",
+        success:  function(response) {
+            RenderModal(response);
+            var mainModal = new bootstrap.Modal(document.getElementById('main_modal'), {
+                keyboard: true
+            });
+            mainModal.handleUpdate();
+            mainModal.show();
+        }
+    });
+}

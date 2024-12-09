@@ -1,0 +1,458 @@
+function ShowUserPoll(){
+    CleanModal();
+    var mainModal = new bootstrap.Modal(document.getElementById('main_modal'), {
+                keyboard: false,
+                backdrop: 'static'
+            });
+            mainModal.handleUpdate();
+            mainModal.show();
+    $.ajax({
+        url:   Routing.generate('faire_home_user_poll'),
+        type:  'GET',
+        success:  function(response) {
+            RenderModal(response.html);
+        }
+    });
+}
+
+function ShowVirtualCompanyJobs(companyId){
+    CleanModal();
+    var mainModal = new bootstrap.Modal(document.getElementById('main_modal'), {
+        keyboard: false,
+        backdrop: 'static'
+    });
+    mainModal.handleUpdate();
+    mainModal.show();
+    $.ajax({
+        url:   Routing.generate('faire_home_virtual_company_jobs', { 'companyId' : companyId }),
+        type:  'GET',
+        success:  function(response) {
+            RenderModal(response);
+        }
+    });
+}
+
+function ShowCompanySchedule(companyId){
+    $( ".gridCompany").unbind( "click" );
+    CleanModal();
+    var mainModal = new bootstrap.Modal(document.getElementById('main_modal'), {
+                keyboard: false,
+                backdrop: 'static'
+            });
+            mainModal.handleUpdate();
+            mainModal.show();
+    $.ajax({
+        url:   Routing.generate('faire_home_view_schedule', { 'companyId' : companyId }),
+        type:  'GET',
+        success:  function(response) {
+            RenderModal(response);
+        }
+    });
+}
+
+function ShowAdminVideoForm(companyId, videoId){
+    var url;
+    if(!videoId){
+        url = Routing.generate('faire_admin_virtual_company_videos_form', { companyId : companyId });
+    }else{
+        url = Routing.generate('faire_admin_virtual_company_videos_form', { companyId : companyId, videoId : videoId });
+    }
+    CleanModal();
+    var mainModal = new bootstrap.Modal(document.getElementById('main_modal'), {
+                keyboard: false,
+                backdrop: 'static'
+            });
+            mainModal.handleUpdate();
+            mainModal.show();
+    $.ajax({
+        url:   url,
+        type:  'GET',
+        success:  function(response) {
+            RenderModal(response);
+        }
+    });
+}
+
+function ShowAdminTestimonyForm(companyId, testimonyId){
+    var url;
+    if(!testimonyId){
+        url = Routing.generate('faire_admin_virtual_company_testimonies_form', { companyId : companyId });
+    }else{
+        url = Routing.generate('faire_admin_virtual_company_testimonies_form', { companyId : companyId, testimonyId : testimonyId });
+    }
+    CleanModal();
+    var mainModal = new bootstrap.Modal(document.getElementById('main_modal'), {
+                keyboard: false,
+                backdrop: 'static'
+            });
+            mainModal.handleUpdate();
+            mainModal.show();
+    $.ajax({
+        url:   url,
+        type:  'GET',
+        success:  function(response) {
+            RenderModal(response);
+        }
+    });
+}
+
+function NewQuestionForm(companyId){
+    CleanModal();
+    $.ajax({
+        url: Routing.generate('faire_account_question', {'companyId' : companyId}),
+        type: 'GET',
+        success: function(response) {
+            RenderModal(response);
+            var mainModal = new bootstrap.Modal(document.getElementById('main_modal'), {
+                keyboard: false,
+                backdrop: 'static'
+            });
+            mainModal.handleUpdate();
+            mainModal.show();
+            $("#main_modal").on('shown.bs.modal', function() {
+                $("#question").focus();
+            });
+        },
+        error: function(xhr, status, error) {
+            console.log(xhr.responseText);
+        }
+    });
+}
+
+function SendMessageToCompany(applicationId){
+    CleanModal();
+    var mainModal = new bootstrap.Modal(document.getElementById('main_modal'), {
+                keyboard: false,
+                backdrop: 'static'
+            });
+            mainModal.handleUpdate();
+            mainModal.show();
+    $.ajax({
+        url:   Routing.generate('faire_account_send_message', {'applicationId': applicationId}),
+        type:  'GET',
+        success:  function(response) {
+            RenderModal(response);
+            $('#subject').focus();
+        }
+    });
+}
+
+function SaveInterviewLinks(){
+    if($('#ilLink').val().length > 4) {
+        var data = {tool : $('#ilTool').val(), link : $('#ilLink').val(), interviewer: $('#ilInterviewer').val(), id: $('#ilId').val() };
+        $.ajax({
+            url: Routing.generate('faire_companies_save_interview_link'),
+            type: "POST",
+            data: data,
+            success: function(response) {
+                $('#ilCancel').click();
+                loadLinkList();
+                flashMessages({'type': 'success', 'message': 'Link guardado correctamente' });
+            }
+        });
+    }
+    else {
+        alert("El link es necesario para poder guardar");
+    }
+}
+
+function DeleteInterviewLinks(linkId){
+    if(confirm("Desea borrar este link?")) {
+        $.ajax({
+            url: Routing.generate('faire_companies_interview_link_delete', {'linkId': linkId}),
+            type: 'GET',
+            success: function(response) {
+                loadLinkList();
+                flashMessages({'type': 'success', 'message': 'Link borrado correctamente' });
+            },
+            error: function(response) {
+                flashMessages({'type': 'error', 'message': 'El link está siendo usado para al menos una entrevista, no puede borrarse' });
+            }
+        });
+    }
+}
+
+function EditOneInterviewLink(interviewId){
+    CleanModal();
+    var mainModal = new bootstrap.Modal(document.getElementById('main_modal'), {
+                keyboard: false,
+                backdrop: 'static'
+            });
+            mainModal.handleUpdate();
+            mainModal.show();
+    $.ajax({
+        url:   Routing.generate('faire_companies_edit_one_interview_link', {'interviewId': interviewId}),
+        type:  'GET',
+        success:  function(response) {
+            RenderModal(response);
+        }
+    });
+}
+
+function EditOneInterviewLinkAdmin(interviewId){
+    CleanModal();
+    var mainModal = new bootstrap.Modal(document.getElementById('main_modal'), {
+                keyboard: false,
+                backdrop: 'static'
+            });
+            mainModal.handleUpdate();
+            mainModal.show();
+    $.ajax({
+        url:   Routing.generate('faire_admin_edit_one_interview_link', {'interviewId': interviewId}),
+        type:  'GET',
+        success:  function(response) {
+            RenderModal(response);
+        }
+    });
+}
+
+function SaveInterviewLinksByCompany(company){
+    if($('#ilLink').val().length > 4) {
+        var data = {tool : $('#ilTool').val(), link : $('#ilLink').val(), interviewer: $('#ilInterviewer').val(), id: $('#ilId').val(), company: company };
+        $.ajax({
+            url: Routing.generate('faire_admin_save_interview_link'),
+            type: "POST",
+            data: data,
+            success: function(response) {
+                $('#ilCancel').click();
+                loadLinkList();
+                flashMessages({'type': 'success', 'message': 'Link guardado correctamente' });
+            }
+        });
+    }
+    else {
+        alert("El link es necesario para poder guardar");
+    }
+}
+
+function DeleteInterviewLinksByCompany(linkId, companyId){
+    if(confirm("Desea borrar este link?")) {
+        $.ajax({
+            url: Routing.generate('faire_admin_interview_link_delete', {'linkId': linkId , 'companyId': companyId}),
+            type: 'GET',
+            success: function(response) {
+                loadLinkList();
+                flashMessages({'type': 'success', 'message': 'Link borrado correctamente'});
+            },
+            error: function(response) {
+                flashMessages({'type': 'error', 'message': 'El link está siendo usado para al menos una entrevista, no puede borrarse' });
+            }
+        });
+    }
+}
+
+function SendInterviewReminder(interviewId){
+    if(confirm("Desea enviar un recordatorio de la entrevista?")) {
+        $.ajax({
+            url: Routing.generate('faire_companies_interview_send_reminder', {'interviewId': interviewId }),
+            type: 'GET',
+            success: function(response) {
+                flashMessages({'type': 'success', 'message': 'Recordatorio enviado correctamente' });
+            },
+            error: function(response) {
+                flashMessages({'type': 'error', 'message': 'Hubo un error al enviar el recordatorio' });
+            }
+        });
+    }
+}
+
+function SendInterviewReminderAdmin(interviewId){
+    if(confirm("Desea enviar un recordatorio de la entrevista?")) {
+        $.ajax({
+            url: Routing.generate('faire_admin_interview_send_reminder', {'interviewId': interviewId }),
+            type: 'GET',
+            success: function(response) {
+                flashMessages({'type': 'success', 'message': 'Recordatorio enviado correctamente' });
+            },
+            error: function(response) {
+                flashMessages({'type': 'error', 'message': 'Hubo un error al enviar el recordatorio' });
+            }
+        });
+    }
+}
+
+function LoungeChanged(loungeId){
+    if(loungeId) {
+        var select = $("#categorySelect");
+        if(select && select.length > 0){
+            select.prop("disabled", true);
+            select.empty();
+
+            $.getJSON(
+                Routing.generate('faire_lounge_change', { loungeId : loungeId }),
+                function(data, textStatus, jqXHR) {
+                    $.each(data.categories, function(i, obj) {
+                        select.append('<option value="' + obj.id + '">' + obj.name + '</option>');
+                    });
+
+                    select.prop("disabled", false);
+                    if(select.hasClass('selectpicker')) select.selectpicker('refresh');
+                }
+            );
+        }
+    }
+}
+
+function SaveStandPreferences(){
+    var data = { allowStandCV : $('#allowStandCV').val(), allowStandQuestions : $('#allowStandQuestions').val() };
+    $.ajax({
+        url: Routing.generate('faire_companies_stand_preferences'),
+        type: "POST",
+        data: data,
+        success: function(response) {flashMessages({'type': 'success', 'message': 'Preferencia guardada correctamente'});
+        }
+    });
+}
+
+function SaveStandPreferencesAdmin(companyId) {
+    var data = {allowStandCV: $('#allowStandCV').val(), allowStandQuestions: $('#allowStandQuestions').val()};
+    $.ajax({
+        url: Routing.generate('faire_admin_stand_preferences', {companyId: companyId}),
+        type: "POST",
+        data: data,
+        success: function(response) {
+            flashMessages({'type': 'success', 'message': 'Preferencia guardada correctamente'});
+        }
+    });
+}
+
+function saveChangeScreenType(){
+    var data = { screenType : $('#screenType').val() };
+    $.ajax({
+        url: Routing.generate('faire_companies_screen_type'),
+        type: "POST",
+        data: data,
+        success: function(response) {
+            flashMessages({'type': 'success', 'message': 'Preferencia guardada correctamente'});
+        }
+    });
+}
+
+function saveChangeScreenTypeAdmin(companyId){
+    var data = { screenType : $('#screenType').val() };
+    $.ajax({
+        url: Routing.generate('faire_admin_stand_screen_type', { companyId : companyId }),
+        type: "POST",
+        data: data,
+        success: function(response) {
+            flashMessages({'type': 'success', 'message': 'Preferencia guardada correctamente'});
+        }
+    });
+}
+
+function CheckCompanyUserFairAdmin(){
+    var username = $('#email').val().toLowerCase();
+    $('#email').val(username);
+    var oldEmail = $('#email').data('email');
+    if(username != oldEmail) {
+        $('#email').data('email',username);
+        $('#company_user_fields').html('');
+        $('#company_user_password').html('');
+        $('#portal-register-container').addClass('visually-hidden');
+
+        if (ValidUsername(username)) {
+            $('#check_username').addClass('visually-hidden');
+            $('#submit_register').show();
+            $.ajax({
+                url: Routing.generate('faire_admin_company_register_check_username', {'username': username}),
+                type: 'GET',
+                success: function(response) {
+                    if (response.result == 'USER_EXIST') {
+                        $('#company_user_password').html(response.html);
+                    } else if (response.result == 'USER_NOT_EXIST') {
+                        $('#company_user_fields').html(response.html);
+                        intlPhoneInput('#contactPhone','Info[contactPhone]');
+                        $('#contactPhone').val($('#phone').val());
+                    }
+                    $('#portal-register-container').removeClass('visually-hidden');
+                    InitiateToolTips();
+                }
+            });
+        } else {
+            $('#check_username').removeClass('visually-hidden');
+        }
+    }
+}
+
+function CheckCompanyFairUser(){
+    var username = $('#email').val();
+    var position = $('#position').val();
+    $('#company_user_fields').html('');
+    $('#portal-register-btn').addClass('visually-hidden');
+
+    if(ValidUsername(username) && position.length > 0){
+        $('.check_username').addClass('visually-hidden');
+        $('#submit_register').show();
+        $.ajax({
+            url: Routing.generate('faire_companies_check_username', { 'username' : username }),
+            type: 'GET',
+            success: function(response) {
+                $('#company_user_fields').html(response);
+                $('#portal-register-btn').removeClass('visually-hidden');
+                InitiateToolTips();
+            }
+        });
+    }else{
+        $('.check_username').removeClass('visually-hidden');
+    }
+}
+
+function RegisterCheckCompanyFairUser(){
+    var username = $('#email').val().toLowerCase();
+    $('#email').val(username);
+    var oldEmail = $('#email').data('email');
+    if(username != oldEmail) {
+        $('#email').data('email',username);
+        $('#company_user_fields').html('');
+        $('#company_user_password').html('');
+        $('#portal-register-div').addClass('visually-hidden');
+
+        if(ValidUsername(username)){
+            $('#check_username').addClass('visually-hidden');
+            $('#submit_register').show();
+            $.ajax({
+                url: Routing.generate('faire_companies_register_check_username', { 'username' : username }),
+                type: 'GET',
+                success: function(response) {
+                    if (response.result == 'USER_EXIST') {
+                        $('#company_user_password').html(response.html);
+                    } else if (response.result == 'USER_NOT_EXIST') {
+                        $('#company_user_fields').html(response.html);
+                        intlPhoneInput('#cellphone', 'Info[cellphone]');
+                        $('#contactPhone').val($('#phone').val());
+                    }
+                    $('#portal-register-div').removeClass('visually-hidden');
+                    InitiateToolTips();
+                }
+            });
+        }else{
+            $('#check_username').removeClass('visually-hidden');
+        }
+    }
+}
+
+function OpenAddCompanyFairUserForm(){
+    CleanModal();
+    $.ajax({
+        url: Routing.generate('faire_companies_add_user_access_form'),
+        type: 'GET',
+        success: function(response) {
+            RenderModal(response);
+            var mainModal = new bootstrap.Modal(document.getElementById('main_modal'), {
+                keyboard: false,
+                backdrop: 'static'
+            });
+            mainModal.handleUpdate();
+            mainModal.show();
+        }
+    });
+}
+
+$(document).ready(function() {
+    $('ul.dropdown-menu [data-toggle=dropdown]').on('click', function(event) {
+        event.preventDefault();
+        event.stopPropagation();
+        $(this).parent().siblings().removeClass('open');
+        $(this).parent().toggleClass('open');
+    });
+});

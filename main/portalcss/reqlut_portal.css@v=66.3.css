@@ -1,0 +1,166 @@
+    .webinar-visor { background-size: cover !important; background: url('https://reqlut.com/main/portalcss/https\3A \2F \2F reqlut2\2E s3\2E sa\2D east\2D 1\2E amazonaws\2E com\2F reqlut\2D images/reqlut/webinar-show.png') center center; width: 1200px; max-width: 100%; height: 600px; margin: 0 auto; position: relative; }
+    .webinar-visor-video { background: black; width: 83%; height: 350px; position: absolute; top: 72px; left: 8.5%; overflow: hidden; border-radius: 0 !important; }
+    .webinar-chat { height: 650px; }
+    @media (max-width: 767px) {
+        .content-feature .thumbnail-view {height: 400px; width: 100%; background-size: contain !important; background-position: center center !important; background-repeat: no-repeat !important; }
+        .webinar-visor {background: white; max-width: 100%; max-height: 400px;}
+        .webinar-visor-video {border-radius: 10px; background: black; max-width: 100%; position: relative; top: 0; left:0;}
+    }
+
+    @media (max-width: 1199px) {
+        .webinar-visor-video {left:15px;top: 64px; height: 360px; width: 96%; }
+    }
+
+    @media (max-width: 990px) {
+        .webinar-visor-video {left:0px; width: 100%; }
+    }
+
+    @media (max-width: 600px) {
+        .webinar-visor-video {left:0;}
+    }
+
+.line{border-bottom: 1px solid #0069d9; width: 35%; display: block; margin: 20px auto 0 auto;}
+.datetimepicker {font-size: .9rem !important;line-height: 1.5rem !important;}
+
+.nice-list .nice-list-title{color: #0069d9;}
+.nice-list .nice-card-content .nice-title{color: #0069d9;}
+.nice-list .nice-card-content .nice-icon{color: #0069d9;}
+.nice-list .nice-card-content .nice-tools{color: #0069d9;}
+.nice-list .nice-card-content .nice-sub-title{color: #0069d9;}
+.nice-list .nice-card-content .nice-category{color: #fff; background-color: #fd8f00; padding: 2px 10px 2px 5px; position: absolute; top: 10px; left: 1px; bottom: inherit; right: inherit;}
+.nice-list .nice-card-content .nice-category-br{color: #fff; background-color: #fd8f00; padding: 2px 10px 2px 5px; position: absolute; bottom: 10px; right: 1px; top: inherit; left: inherit;}
+.nice-list .nice-card-content .nice-price{color: #fff; background-color: #fd8f00; padding: 2px 10px 2px 5px; position: absolute; bottom: 10px; right: 1px; left: inherit; top: inherit;}
+
+.nice-box { margin: 20px 10px; border-radius: 2px; padding: 0; overflow: hidden; border: 1px solid #d9d9d9; height: 300px; transition: transform .4s; /* Animation */ }
+.nice-box:hover { transform: scale(1.05); }
+.nice-box-img { height: 200px; width: 100%; background-size: contain !important; background-position: center center !important; background-repeat: no-repeat !important; }
+.nice-box-tag-tl { position: absolute; top: 0px; left: 0; background: #0069d9; padding: 2px 4px; color: white; font-size: 12px !important; }
+.nice-box-tag-tr { position: absolute; top: 0px; right: 0; background: #0069d9; padding: 2px 4px; color: white; font-size: 12px !important; }
+.nice-box-tag-bl { position: absolute; bottom: 0px; left: 0; background: #0069d9; padding: 2px 4px; color: white;font-size: 12px !important; }
+.nice-box-tag-br { position: absolute; bottom: 0px; right: 0; background: #0069d9; padding: 2px 4px; color: white; font-size: 12px !important; }
+#latestNews .thumbnail-view, .news .thumbnail-view, #latestEvents .thumbnail-view, .events .thumbnail-view{ height: 180px; width: 100%; background-size: cover !important; background-position: center center !important; background-repeat: no-repeat !important; }
+@media (min-width: 992px) {
+    #latestNews .nice-card.col-lg-3, #latestEvents .nice-card.col-lg-3 {width: calc(25% - 20px) !important;}
+}
+
+.chat-container {width: 100%; height: 100%; max-width: 400px; max-height: 500px; padding: 8px; }
+.chat-container-fluid { width: 100%; padding: 5px; }
+.chat-body { width: 100%; height: 100%; overflow: auto; min-height: 300px; max-height: 400px; padding: 5px; font-size: 12px; }
+.chat-inputs { width: 100%; padding: 5px; }
+.chat-author { font-size: 11px; font-weight: bold; width: 100%; display: block; text-align: left;}
+.chat-date { font-size: 11px; font-weight: bold; width: 100%; display: block; text-align: right;}
+.chat-message {padding: 5px;border: 1px solid lightgray;margin: 4px 0;display: block;}
+
+.portlet { margin-bottom: 15px; }
+.btn-white { border-color: #cccccc; color: #333333; background-color: #ffffff; }
+.portlet { border: 1px solid; }
+.portlet .portlet-heading { padding: 0 15px; }
+.portlet .portlet-heading h4 { padding: 1px 0; font-size: 16px; }
+.portlet .portlet-heading a { color: #fff; }
+.portlet .portlet-heading a:hover, .portlet .portlet-heading a:active, .portlet .portlet-heading a:focus { outline: none; }
+.portlet .portlet-widgets .dropdown-menu a { color: #333; }
+.portlet .portlet-widgets ul.dropdown-menu { min-width: 0; }
+.portlet .portlet-heading .portlet-title { float: left; }
+.portlet .portlet-heading .portlet-title h4 { margin: 10px 0; }
+.portlet .portlet-heading .portlet-widgets { float: right; margin: 8px 0; }
+.portlet .portlet-heading .portlet-widgets .tabbed-portlets { display: inline; }
+.portlet .portlet-heading .portlet-widgets .divider { margin: 0 5px; }
+.portlet .portlet-body { padding: 15px; background: #fff; }
+.portlet .portlet-footer { padding: 10px 15px; background: #e0e7e8; }
+.portlet .portlet-footer ul { margin: 0; }
+.portlet-green, .portlet-green>.portlet-heading { border-color: #16a085; }
+.portlet-green>.portlet-heading { color: #fff; background-color: #16a085; }
+.portlet-orange, .portlet-orange>.portlet-heading { border-color: #f39c12; }
+.portlet-orange>.portlet-heading { color: #fff; background-color: #f39c12; }
+.portlet-blue, .portlet-blue>.portlet-heading { border-color: #2980b9; }
+.portlet-blue>.portlet-heading { color: #fff; background-color: #2980b9; }
+.portlet-red, .portlet-red>.portlet-heading { border-color: #e74c3c; }
+.portlet-red>.portlet-heading { color: #fff; background-color: #e74c3c; }
+.portlet-purple, .portlet-purple>.portlet-heading { border-color: #8e44ad; }
+.portlet-purple>.portlet-heading { color: #fff; background-color: #8e44ad; }
+.portlet-default, .portlet-dark-blue, .portlet-default>.portlet-heading, .portlet-dark-blue>.portlet-heading { border-color: #34495e; }
+.portlet-default>.portlet-heading,
+.portlet-dark-blue>.portlet-heading { color: #fff; background-color: #34495e; }
+.portlet-basic, .portlet-basic>.portlet-heading { border-color: #333; }
+.portlet-basic>.portlet-heading { border-bottom: 1px solid #333; color: #333; background-color: #fff; }
+@media(min-width:768px) { .portlet { margin-bottom: 30px; } }
+.img-chat{ width:40px; height:40px; }
+.text-green { color: #16a085; }
+.text-orange { color: #f39c12; }
+.text-red { color: #e74c3c; }
+.btn-circle.btn-sm { width: 30px; height: 30px; padding: 6px 0px; border-radius: 15px; text-align: center;}
+
+@media (max-width: 767px) {
+    #mini_hero{padding: 0 0 20px 0;}
+    #mini_hero h1{ font-size: 24px;}
+}
+    #mini_hero{ -webkit-background-size: cover !important;  -moz-background-size: cover !important; -o-background-size: cover !important;  background-size: cover !important; padding: 0 0 40px 0; border-bottom: solid 4px #444; background: url('https://reqlut.com/main/portalcss/https\3A \2F \2F reqlut2\2E s3\2E sa\2D east\2D 1\2E amazonaws\2E com\2F reqlut\2D images/reqlut/home.jpg?v=66.3') no-repeat center center; #0069d9;}
+
+#mini_hero h1{ color: #484848; font-size: 30px; font-weight: 300; padding: 20px;}
+#mini_hero .cuadrotrans p{text-transform: none; font-size:16px;}
+
+.cuadrotrans{background: rgb(0, 45, 86); /* Fall-back for browsers that don't support rgba */background: rgba(0, 45, 86, .3); width:80%; margin:auto; padding:0;}
+.cuadrotrans h1 { color: #fff !important;font-size: 32px;font-weight: 300;text-align: center;text-transform: uppercase;text-shadow: none !important;}
+.cuadrotrans p { color: #fff; font-size: 24px; font-weight:500; margin-bottom:20px; text-align:center; text-transform: uppercase; }
+
+@media (min-width: 768px){
+    .br5-primary-left{border-left: 5px solid #0069d9;}
+    .br5-primary-right{border-right: 5px solid #0069d9;}
+    .br5-secondary-left{border-left: 5px solid #fd8f00;}
+    .br5-secondary-right{border-right: 5px solid #fd8f00;}
+}
+
+@media (max-width: 767px) {
+}
+
+#calendar-table tr td { font-size: 15px;}
+
+@media (max-width: 768px){
+    #calendar-table tr td, #calendar-table tr td .btn { font-size: 11px; }
+    #calendar-table tr td { padding: 4px !important; }
+}
+
+
+.job_offer_list.recommended{border: 4px solid #1D1B3D !important; border-radius: 10px; position: relative !important; padding: 15px 5px !important; }
+.job_offer_list .featured_badge{position: absolute; top: -10px; right: 10px; width: 70px; cursor: help; }
+.related_job_offer_list .featured_badge{position: absolute; top: -5px; right: 0px; max-width: 40px; cursor: help; }
+.riah-btn-circle { width: 50px; height: 50px; padding: 6px 0px; border-radius: 25px; text-align: center; }
+.riah-love{ background-image : url(https://reqlut.com/main/portalcss/https\3A \2F \2F reqlut2\2E s3\2E sa\2D east\2D 1\2E amazonaws\2E com\2F reqlut\2D images/Riah/riah_love.png); background-size: cover; display: inline-block; height: 35px; width: 35px; }
+.riah-unhappy{ background-image : url(https://reqlut.com/main/portalcss/https\3A \2F \2F reqlut2\2E s3\2E sa\2D east\2D 1\2E amazonaws\2E com\2F reqlut\2D images/Riah/riah_unhappy.png); background-size: cover; display: inline-block; height: 35px; width: 35px; }
+
+.modal-backdrop{position: fixed !important; bottom: 0 !important;}
+
+.contact-cards {display: flex;flex-wrap: wrap;}
+.contact-card { border: 1px solid lightgray; min-height: 200px; padding: 15px; align-self: center; position: relative; margin: 15px; width: 46%; min-width: 330px;}
+.contact-card-tab { background-color: #0069d9; width: 10px; height: 50px;position: absolute; left: -10px; top: 10%; }
+.contact-card-photo { padding-right: 10px; width: 30%; float: left; display: flex; align-items: center;justify-content: center; min-height: 140px; }
+.contact-card-data { padding-left: 10px; width: 69%; float: right; }
+.contact-card-title {font-size: 1.1em; font-weight: bold; }
+.contact-card-info {font-size: .8em; }
+.contact-card-date {font-size: .8em; color: grey; }
+.contact-card-message {font-size: .8em; border-top: 1px solid lightgray; padding-top: 2px; margin-top: 2px;  }
+.contact-photo { width: 60px; height: 60px; background-color: white; border-radius: 50%; background-position: center center !important; background-size: cover !important;}
+.contact-photo-60 { height: 100px !important; width: 100px !important;}
+.contact-photo-100 { height: 100px !important;; width: 100px !important;}
+.messages-wall {padding:30px 40px; max-height: 500px; overflow-y: auto; border: 1px solid lightgray;}
+.messages-wall-message { display: flex; flex-direction: column; padding: 20px 50px; align-self: center; margin: 10px 0; position: relative; width: 100%; min-width: 330px;}
+.messages-wall-message-date {font-size: .8em; color: grey; position: absolute; top: 0px; }
+.messages-wall-message-photo { position: absolute; width: 60px; height: 60px; background-color: white; border-radius: 50%; background-position: center center !important; background-size: cover !important; bottom: 0px;;}
+.message-from-me { right: -20px;}
+.message-from-them { left: -20px;}
+.border-grey{border: 1px solid lightgray; padding: 15px;}
+.messages-wall-message p {margin-top:20px; border-radius: 1.15rem;line-height: 1.25;max-width: 75%;padding: 0.5rem .875rem;position: relative;word-wrap: break-word;}
+.messages-wall-message p::before, .messages-wall-message p::after {bottom: -0.1rem;content: "";height: 1rem;position: absolute;}
+p.from-me {align-self: flex-end;background-color: #248bf5;color: #fff;}
+p.from-me::before {border-bottom-left-radius: 0.8rem 0.7rem;border-right: 1rem solid #248bf5;right: -0.35rem;transform: translate(0, -0.1rem);}
+p.from-me::after {background-color: #fff;border-bottom-left-radius: 0.5rem;right: -40px;transform:translate(-30px, -2px);width: 10px;}
+p[class^="from-"] {margin: 0.5rem 0;width: fit-content;}
+p.from-me ~ p.from-me {margin: 0.25rem 0 0;}
+p.from-me ~ p.from-me:not(:last-child) {margin: 0.25rem 0 0;}
+p.from-me ~ p.from-me:last-child {margin-bottom: 0.5rem;}
+p.from-them {align-items: flex-start;background-color: #e5e5ea;color: #000;}
+p.from-them:before {border-bottom-right-radius: 0.8rem 0.7rem;border-left: 1rem solid #e5e5ea;left: -0.35rem;transform: translate(0, -0.1rem);}
+p.from-them::after {background-color: #fff;border-bottom-right-radius: 0.5rem;left: 20px;transform: translate(-30px, -2px);width: 10px;}
+p[class^="from-"].emoji {background: none;font-size: 2.5rem;}
+p[class^="from-"].emoji::before {content: none;}
+.no-tail::before {display: none;}

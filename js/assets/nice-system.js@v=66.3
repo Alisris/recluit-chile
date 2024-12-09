@@ -1,0 +1,14 @@
+$(document).ready(function(){
+    hoverSpecial();
+});
+
+function hoverSpecial(){
+    $('.hoverSpecial').hover(function(event){
+        $('.hoverSpecial').removeClass('highlight');
+
+        var element = $(event.currentTarget).addClass('highlight');
+        var target = element.data('target');
+        if(typeof target !== 'undefined' && target != null)
+            $(target).addClass('highlight');
+    });
+}

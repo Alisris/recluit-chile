@@ -1,0 +1,78 @@
+
+@media (max-width: 767px) {
+    .container-fluid.gray{font-size: 14px;}
+    .container-fluid.benefits{font-size: 16px; padding: 10px 0;}
+    .container-fluid.benefitsContent{ padding: 0 0 10px 0; border-top: none; background-color: #99b83f; }
+    .container-fluid.benefitsContent .title{ color: #fff;  font-size: 14px;}
+    .container-fluid.benefitsContent .photo{ margin-top: 0;}
+    .container-fluid.benefitsContent .photo img{ height: 90px; }
+
+    #home_hero #title{ font-size: 26px; padding-top: 20px; text-align: center;}
+    #home_hero #title #small{ font-size: 26px;}
+
+    #home_hero .loginHome{ padding-top: 10px !important; padding-bottom: 10px !important; font-size: 18px;}
+    #hero_campaign { padding-bottom: 40px;}
+    #hero_campaign .first-row{margin-top:30px; text-align: center;}
+    #hero_campaign h1{font-size: 24px; margin-top: 50px;}
+    #hero_campaign h2{font-size: 20px; margin-top: 20px;}
+    #hero_campaign{padding-bottom: 50px;}
+
+    #hero_duoc {padding-bottom: 50px;}
+    #hero_duoc h1{ font-size: 26px; margin-top: 100px;}
+    #mini_hero_duoc{padding: 0 0 20px 0;}
+    #mini_hero_duoc h1{ font-size: 24px;}
+
+    .validate_rut{color: #7c7c7c; margin: 30px 0;}
+    .validate_rut h2{font-size: 18px;}
+
+    .home_do .tit{font-size: 18px;}
+    .home_do .subtit{font-size: 14px;}
+
+    .access-login{border-radius:10px; height: auto;}
+    .over-access-login{text-align: center;}
+    #account-picker .picker .nombre{max-width: 170px;}
+    .text-center-xs{text-align: center !important;}
+
+    .cont_collage .tiles .tile{height:80px !important; width:calc(100%/4 - 3px) !important;}
+    .cont_collage .tiles {padding-left: 2px;}
+    .cont_collage .tit{ font-size: 16px !important;}
+
+    #duocad-contenedor{width: 100%; margin:auto;}
+
+    #paymentByMP, #paymentByBT {position:relative;}
+}
+
+@media (min-width: 768px) {
+    #job_offer_title_buttons{padding-top: 5px;}
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+    .hidden-sm{display:none;}
+    #home_hero #title{ font-size: 36px; padding-top: 100px;}
+    #home_hero #title #small{ font-size: 34px;}
+    #home_hero .loginHome{ padding-top: 10px !important; padding-bottom: 10px !important; font-size: 20px;}
+    .my_company_user .content .left{ padding-left: 6px; }
+    .cuadrotrans{width: 100% !important;}
+
+    .cont_collage .tiles {padding-left: 0;}
+
+}
+
+@media (max-width: 991px) {
+    .my_company_user .states{font-size: 30px; text-align: center;}
+    #my_company_filters{display:none;}
+}
+
+@media (min-width: 992px) {
+    #my_company_filters{display:block !important;}
+}
+
+@media (min-width: 992px) and (max-width: 1199px) {
+    .hidden-md{display:none;}
+    .cuadrotrans{width: 100% !important;}
+    .cont_collage .tiles {padding-left: 0;}
+}
+
+@media (min-width: 1200px) {
+
+}

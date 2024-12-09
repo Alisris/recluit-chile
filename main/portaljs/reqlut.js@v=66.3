@@ -1,0 +1,486 @@
+$(document).ready(function(){
+    $('.loginLink').click(function(event){
+        loginModal(event);
+    });
+
+        var login_modal = document.getElementById('login_modal');
+    var usernameInput = document.getElementById('username');
+
+    login_modal.addEventListener('shown.bs.modal', function () {
+        usernameInput.focus();
+        $.getScript(Routing.generate('user_auth_captcha_js'));
+    });
+    login_modal.addEventListener('hidden.bs.modal', function () {
+        $('#header-logo').focus();
+    });
+
+    });
+
+function loginModal(event, tab='login'){
+    if(event !== undefined)
+        event.preventDefault();
+    SaveReferer();
+                    var mainModal = new bootstrap.Modal(document.getElementById('login_modal'), {
+            keyboard: true
+        });
+        mainModal.hide();
+        mainModal.show();
+
+        $('#modalLogin-tabs li a#' + tab + 'Tab').tab('show');
+    }
+
+function SaveReferer(){
+    var currentUrl = window.location.href;
+    $.ajax({
+        url: Routing.generate('user_auth_save_referer'),
+        type: "GET",
+        data: { currentUrl: currentUrl },
+        success: function (response) {
+        }
+    });
+}
+
+function loginModalTargetReferer(targetReferer, event){
+    if(event !== undefined)
+        event.preventDefault();
+    SaveTargetReferer(targetReferer);
+            $('#main_modal').modal('hide');
+
+        $('#login_modal').modal({keyboard : true});
+    }
+
+function SaveTargetReferer(targetReferer){
+    $.ajax({
+        url: Routing.generate('user_auth_save_target_referer', {'target' : targetReferer}),
+        type: "GET",
+        success: function (response) {
+        }
+    });
+}
+
+function intlPhoneInput(selector, hiddenInput){
+    var input = document.querySelector(selector);
+    var number = input.value;
+    var countryCode = null;
+    var preferredCountries = null;
+                        preferredCountries = ['cl','pe','co','mx','ar','br','bo','uy','py','ve','es','us']
+            
+    var params = {
+        initialCountry : "auto",
+        geoIpLookup: function(callback) {
+            $.get("https://ipinfo.io", function() {}, "jsonp").always(function(resp) {
+                countryCode = (resp && resp.country) ? resp.country : "";
+                callback(countryCode);
+            });
+        },
+        separateDialCode: false,
+        preferredCountries: preferredCountries,
+        formatOnDisplay: true,
+        customPlaceholder: function(selectedCountryPlaceholder, selectedCountryData) {
+            if(selectedCountryData !== 'undefined' && selectedCountryData.iso2 == 'cl')
+                selectedCountryPlaceholder = '223334444 / 911112222';
+            return selectedCountryPlaceholder;
+        },
+    };
+    if(hiddenInput != null && hiddenInput !== 'undefined') {
+        params['hiddenInput'] = hiddenInput;
+    }
+    var iti = window.intlTelInput(input, params);
+    var form = input.closest('form');
+
+    if(input.value && input.value !== 'undefined' && input.value.substring(0,1) == '+'){
+        var countries = window.intlTelInputGlobals.getCountryData();
+        countryCode = input.value.substring(1,3);
+        var phone = input.value.substring(3);
+        for(var i = 0; i < countries.length;i++){
+            var country = countries[i];
+            if(country.dialCode == countryCode){
+                iti.setCountry(country.iso2);
+                iti.setNumber(phone);
+                break;
+            }
+        }
+
+    }else{
+        if(countryCode == null)
+            iti.setCountry(preferredCountries[0]);
+        else
+            iti.setCountry(countryCode);
+    }
+
+    input.removeEventListener('blur', function(){});
+    input.addEventListener('blur', function(event){ validateIti(iti, input, form); });
+    input.removeEventListener('keydown', function(){});
+    input.addEventListener('keydown', function(event){ validateIti(iti, input, form); });
+    input.removeEventListener('keyup', function(){});
+    input.addEventListener('keyup', function(event){ validateIti(iti, input, form); });
+    input.addEventListener('countrychange', function(event){ validateIti(iti, input, form); })
+
+    if(form){
+        form.addEventListener('submit', function(event){ validateIti(iti, input, form); });
+    }
+
+    if(form && hiddenInput != null && hiddenInput !== 'undefined'){
+        form.addEventListener('submit',function(){
+            if(!iti.isValidNumber()){
+                var countryData = iti.getSelectedCountryData();
+                if(countryData && countryData.hasOwnProperty('dialCode') && iti.getNumber() && iti.getNumber().length > 0) {
+                    document.querySelector('input[name="' + hiddenInput + '"]').value = '+' + countryData.dialCode + iti.getNumber();
+                }
+            }
+        });
+    }
+}
+
+function validateIti(iti, input, form){
+    var submit = null;
+    if(form){
+        submit = form.querySelector('button[type=submit]');
+        if(!submit)
+            submit = form.querySelector('input[type=submit]');
+        if(!submit)
+            submit = form.querySelector('button');
+    }
+    if (input.value && input.value.trim()) {
+        if (iti.isValidNumber()) {
+            input.classList.remove('is-invalid');
+            input.classList.add('is-valid');
+
+            if(submit) {
+                submit.classList.remove('disabled');
+                submit.disabled = false;
+            }
+        }else{
+            input.classList.remove('is-valid');
+            input.classList.add('is-invalid');
+            if(submit)
+                submit.classList.add('disabled');
+        }
+    }else{
+        if(input.required == true) {
+            input.classList.remove('is-valid');
+            input.classList.add('is-invalid');
+            if (submit)
+                submit.classList.add('disabled');
+        }else{
+            input.classList.remove('is-invalid');
+            input.classList.add('is-valid');
+
+            if(submit) {
+                submit.classList.remove('disabled');
+                submit.disabled = false;
+            }
+        }
+    }
+}
+
+function createExperienceSlider(container, label, minExp, maxExp, index){
+    if(typeof index === 'undefined') index = '';
+    container.append($("<label class='form-label'>" + label + "</label>"));
+    container.append($("<div id='experienceSlider" + index + "' style='margin-top: 5px;'></div>"));
+
+    minExp = parseInt(minExp);
+    maxExp = parseInt(maxExp);
+    var minExpLabel = experienceName(minExp);
+    var maxExpLabel = experienceName(maxExp);
+    var div = $("<div style='margin-top: 5px;'></div>");
+    div.append($("<label id='maxExperienceLabel" + index + "' style='float: right;'>"+ maxExpLabel +"</label>"));
+    div.append($("<label id='minExperienceLabel" + index + "'>"+ minExpLabel +"</label>"));
+    container.append(div);
+
+    container.append($("<input type='hidden' id='minExperienceVal" + index + "' name='mne" + index + "' value='" + minExp + "'/>"));
+    container.append($("<input type='hidden' id='maxExperienceVal" + index + "' name='mxe" + index + "' value='" + maxExp + "'/>"));
+
+    $("#experienceSlider" + index).slider({
+        range: true,
+        min: 0,
+        max: 21,
+        values: [ minExp, maxExp ],
+        slide: function( event, ui ) {
+            var min = ui.values[ 0 ];
+            var max = ui.values[ 1 ];
+            $("#minExperienceLabel" + index).html(experienceName(min));
+            $("#maxExperienceLabel" + index).html(experienceName(max));
+            $("#minExperienceVal" + index).val(min);
+            $("#maxExperienceVal" + index).val(max);
+        }
+    });
+}
+
+function createExperienceSliderWithoutHidden(container, label, minExp, maxExp, index){
+    if(typeof index === 'undefined') index = '';
+    container.append($("<label class='form-label'>" + label + "</label>"));
+    container.append($("<div id='experienceSlider" + index + "' style='margin-top: 5px;'></div>"));
+
+    minExp = parseInt(minExp);
+    maxExp = parseInt(maxExp);
+    var minExpLabel = experienceName(minExp);
+    var maxExpLabel = experienceName(maxExp);
+    var div = $("<div style='margin-top: 5px;'></div>");
+
+    div.append($("<label id='maxExperienceLabel" + index + "' style='float: right;'>"+ maxExpLabel +"</label>"));
+    div.append($("<label id='minExperienceLabel" + index + "'>"+ minExpLabel +"</label>"));
+    container.append(div);
+
+    $("#experienceSlider" + index).slider({
+        range: true,
+        min: 0,
+        max: 21,
+        values: [ minExp, maxExp ],
+        slide: function( event, ui ) {
+            var min = ui.values[ 0 ];
+            var max = ui.values[ 1 ];
+            $("#minExperienceLabel" + index).html(experienceName(min));
+            $("#maxExperienceLabel" + index).html(experienceName(max));
+            $("#minExperienceVal" + index).val(min);
+            $("#maxExperienceVal" + index).val(max);
+        }
+    });
+}
+
+function experienceName(experience){
+    if(experience == 1) return '1\u0020a\u00F1o';
+    else if(experience == 21) return 'M\u00E1s\u0020de\u002020\u0020a\u00F1os';
+    else return experience + '\u0020a\u00F1os';
+}
+
+function createSalarySlider(container, label, minSalary, maxSalary, index = '', createHidden = true){
+    if(typeof index === 'undefined') index = '';
+    container.append($("<label class='form-label'>" + label + "</label>"));
+    container.append($("<div id='salarySlider" + index + "' style='margin-top: 5px;'></div>"));
+
+    minSalary = parseInt(minSalary);
+    maxSalary = parseInt(maxSalary);
+    var minSalaryLabel = '\u0024'+filterAddComas(minSalary);
+    var maxSalaryLabel = '\u0024'+filterAddComas(maxSalary);
+    var div = $("<div style='margin-top: 5px;'></div>");
+    div.append($("<label id='maxSalaryLabel" + index + "' style='float: right;'>"+ maxSalaryLabel +"</label>"));
+    div.append($("<label id='minSalaryLabel" + index + "'>"+ minSalaryLabel +"</label>"));
+    container.append(div);
+
+    if(createHidden) {
+        container.append($("<input type='hidden' id='minSalaryVal" + index + "' name='mns" + index + "' value='" + minSalary + "'/>"));
+        container.append($("<input type='hidden' id='maxSalaryVal" + index + "' name='mxs" + index + "' value='" + maxSalary + "'/>"));
+    }
+
+    $("#salarySlider" + index).slider({
+        range: true,
+        min: 0,
+                max: 5000000,
+        step: 200000,
+                values: [ minSalary, maxSalary ],
+        slide: function( event, ui ) {
+            var min = ui.values[ 0 ];
+            var max = ui.values[ 1 ];
+            $("#minSalaryLabel" + index).html('$'+filterAddComas(min));
+            $("#maxSalaryLabel" + index).html('$'+filterAddComas(max));
+            $("#minSalaryVal" + index).val(min);
+            $("#maxSalaryVal" + index).val(max);
+        }
+    });
+}
+
+function createSalarySliderWithoutHidden(container, label, minSalary, maxSalary, index){
+    if(typeof index === 'undefined') index = '';
+    container.append($("<label class='form-label'>" + label + "</label>"));
+    container.append($("<div id='salarySlider" + index + "' style='margin-top: 5px;'></div>"));
+
+    minSalary = parseInt(minSalary);
+    maxSalary = parseInt(maxSalary);
+    var minSalaryLabel = '\u0024'+filterAddComas(minSalary);
+    var maxSalaryLabel = '\u0024'+filterAddComas(maxSalary);
+    var div = $("<div style='margin-top: 5px;'></div>");
+    div.append($("<label id='maxSalaryLabel" + index + "' style='float: right;'>"+ maxSalaryLabel +"</label>"));
+    div.append($("<label id='minSalaryLabel" + index + "'>"+ minSalaryLabel +"</label>"));
+    container.append(div);
+
+    $("#salarySlider" + index).slider({
+        range: true,
+        min: 0,
+                max: 5000000,
+        step: 200000,
+                values: [ minSalary, maxSalary ],
+        slide: function( event, ui ) {
+            var min = ui.values[ 0 ];
+            var max = ui.values[ 1 ];
+            $("#minSalaryLabel" + index).html('\u0024'+filterAddComas(min));
+            $("#maxSalaryLabel" + index).html('\u0024'+filterAddComas(max));
+            $("#minSalaryVal" + index).val(min);
+            $("#maxSalaryVal" + index).val(max);
+        }
+    });
+}
+
+function createPriceSlider(container, label, minPrice, maxPrice, entity, createHidden = true){
+    container.append($("<label>" + label + "</label>"));
+    container.append($("<div id='priceSlider'></div>"));
+
+    minPrice = parseInt(minPrice);
+    maxPrice = parseInt(maxPrice);
+    var minPriceLabel = '\u0024'+filterAddComas(minPrice);
+    var maxPriceLabel = '\u0024'+filterAddComas(maxPrice);
+    var div = $("<div></div>");
+    div.append($("<label id='maxPriceLabel' style='float: right;'>"+ maxPriceLabel +"</label>"));
+    div.append($("<label id='minPriceLabel'>"+ minPriceLabel +"</label>"));
+    container.append(div);
+
+    if(createHidden) {
+        container.append($("<input type='hidden' id='minPriceVal' name='" + entity + "[minPrice]' value='" + minPrice + "'/>"));
+        container.append($("<input type='hidden' id='maxPriceVal' name='" + entity + "[maxPrice]' value='" + maxPrice + "'/>"));
+    }
+
+    $("#priceSlider").slider({
+        range: true,
+        min: 0,
+                max: 5000000,
+        step: 200000,
+                values: [ minPrice, maxPrice ],
+        slide: function( event, ui ) {
+            var min = ui.values[ 0 ];
+            var max = ui.values[ 1 ];
+            $('#minPriceLabel').html('\u0024'+filterAddComas(min));
+            $('#maxPriceLabel').html('\u0024'+filterAddComas(max));
+            $('#minPriceVal').val(min);
+            $('#maxPriceVal').val(max);
+        }
+    });
+}
+
+function createPercentageSliderWithoutHidden(container, label, minPer, maxPer, index){
+    if(typeof index === 'undefined') index = '';
+    if(label) container.append($("<label>" + label + "</label>"));
+    container.append($("<div id='PercentageSlider" + index + "' style='margin-top: 5px;'></div>"));
+
+    minPer = parseInt(minPer);
+    maxPer = parseInt(maxPer);
+    var div = $("<div style='margin-top: 5px;'></div>");
+
+    div.append($("<label id='minPercentageLabel" + index + "' style='float: left;'>"+ minPer +"%</label>"));
+    div.append($("<label id='maxPercentageLabel" + index + "' style='float: right;'>"+ maxPer +"%</label>"));
+    container.append(div);
+
+    $("#PercentageSlider" + index).slider({
+        range: true,
+        min: 0,
+        max: 100,
+        values: [ minPer, maxPer ],
+        slide: function( event, ui ) {
+            var min = ui.values[ 0 ];
+            var max = ui.values[ 1 ];
+            $("#minPercentageLabel" + index).html(min + "%");
+            $("#maxPercentageLabel" + index).html(max + "%");
+            $("#minPercentageVal" + index).val(min);
+            $("#maxPercentageVal" + index).val(max);
+        }
+    });
+}
+
+function SaveTimeZone(){
+    var data = { timeZone : Intl.DateTimeFormat().resolvedOptions().timeZone };
+    $.ajax({
+        url: Routing.generate('user_save_timezone'),
+        type: "POST",
+        data: data,
+        success: function (response) {
+            location.reload();
+        }
+    });
+}
+
+
+$(document).ready(function(){
+    $('.validarRUT').blur(function () {
+        var id = $(this).attr('id');
+        if ($(this).val().length > 0) {
+            if(!revisarDigito2($(this).val())){
+                alert("El RUT tiene un formato incorrecto.");
+                $("#" + id).val("");
+                $("#" + id).focus();
+            }
+            else {
+                var elRut = $(this).val().split("-");
+                if (elRut.length == 1) {
+                    var largo = $(this).val().length;
+                    var rut = $(this).val().substring(0, largo - 1);
+                    var dv = $(this).val().charAt(largo - 1);
+                    $("#" + id).val(rut + "-" + dv);
+                }
+            }
+        }
+    });
+});
+
+function validateRut(input){
+    input.blur(function () {
+        var id = input.attr('id');
+        if ($(this).val().length > 0) {
+            if(!revisarDigito2($(this).val())){
+                alert("El RUT tiene un formato incorrecto.");
+                $("#" + id).val("");
+                $("#" + id).focus();
+            }
+            else {
+                var elRut = $(this).val().split("-");
+                if (elRut.length == 1) {
+                    var largo = $(this).val().length;
+                    var rut = $(this).val().substring(0, largo - 1);
+                    var dv = $(this).val().charAt(largo - 1);
+                    $("#" + id).val(rut + "-" + dv);
+                }
+            }
+        }
+    });
+}
+
+function revisarDigito(dvr){
+    dv = dvr + "";
+    if ( dv != '0' && dv != '1' && dv != '2' && dv != '3' && dv != '4' && dv != '5' && dv != '6' && dv != '7' && dv != '8' && dv != '9' && dv != 'k'  && dv != 'K') {
+        return false;
+    }
+    return true;
+}
+
+function revisarDigito2(crut){
+    largo = crut.length;
+    var elRut = crut.split("-");
+
+    if (elRut.length > 1){
+        rut = elRut[0];
+        dv = elRut[1];
+    }
+    else {
+        if (largo > 2)
+            rut = crut.substring(0, largo - 1);
+        else
+            rut = crut.charAt(0);
+        dv = crut.charAt(largo - 1);
+    }
+
+    if (!revisarDigito(dv))
+        return false;
+    if ( rut == null || dv == null )
+        return 0
+    var dvr = '0'
+    suma = 0
+    mul  = 2
+    for (i= rut.length -1 ; i >= 0; i--){
+        suma = suma + rut.charAt(i) * mul
+        if (mul == 7)
+            mul = 2
+        else
+            mul++
+    }
+    res = suma % 11
+    if (res==1)
+        dvr = 'k'
+    else if (res==0)
+        dvr = '0'
+    else{
+        dvi = 11-res
+        dvr = dvi + ""
+    }
+    if (dvr != dv.toLowerCase()){
+        return false
+    }
+    return true
+}

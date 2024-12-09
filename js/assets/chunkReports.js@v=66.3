@@ -1,0 +1,540 @@
+var nrows;
+var pages = null;
+var dwn_page = 0;
+var ids = [];
+var cform_id;
+var croute;
+var eroute;
+var cfileName;
+var cdwnMethod;
+var cmethod;
+var blobs = [];
+var stages = [];
+var extra_data = [];
+
+function convertToCSV(arr) {
+    var json = arr;
+    var fields = Object.keys(json[0]);
+    var replacer = function(key, value) {
+        if(value === null || value === undefined) value = '';
+        else value = value.toString().replace(/[;=\t\n]/g, '');
+
+        while(['+', '-', '@'].indexOf(value.charAt(0)) >= 0) value = value.substring(1);
+
+        return value;
+    };
+    var csv = json.map(function(row){
+        return fields.map(function(fieldName){
+            return JSON.stringify(row[fieldName], replacer);
+        }).join(',');
+    });
+    csv = csv.join('\r\n');
+
+    return csv;
+}
+
+function progressBar(progress) {
+    $('#progressBarChunk').attr('aria-valuenow', progress);
+    $('#progressBarChunk').css('width', progress + "%");
+    $('#progressBarChunk').html(progress + "%");
+}
+
+function downloadCsv(data) {
+    var BOM = "\uFEFF";
+    data = BOM + data;
+    var superBuffer = new Blob([data], {type: 'text/csv;charset=utf-8;'});
+    var url = window.URL.createObjectURL(superBuffer);
+    var a = document.createElement('a');
+    a.style.display = 'none';
+    a.href = url;
+    a.download = cfileName;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function() {
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+        blobs = [];
+    }, 100);
+}
+
+function generateFile(form_id, route, fileName, method, downloadMethod, withDates = false) {
+    cform_id = form_id;
+    croute = route;
+    cmethod = method;
+    cdwnMethod = downloadMethod;
+
+    var today = new Date();
+    var date = today.getFullYear() + '-' + (today.getMonth()+1).toString().padStart(2, "0") + '-' + today.getDate().toString().padStart(2, "0");
+    var time = today.getHours().toString().padStart(2, "0") + today.getMinutes().toString().padStart(2, "0") + today.getSeconds().toString().padStart(2, "0");
+    var current_date_time = date + '_' + time;
+    cfileName = current_date_time + "-" + fileName + ".csv";
+
+    var data = $('#' + cform_id).serializeArray();
+    data.push({ name: 'dwn_action', value: withDates ? 'get_dates' : 'get_size' });
+
+    function handleResponse(response) {
+        nrows = response.nrows;
+        pages = response.pages;
+        if (response.ids) ids = response.ids;
+
+        if (nrows > 0) {
+            if (cdwnMethod === 1) {
+                getChunk(1);
+            } else {
+                writeChunk(1);
+            }
+        } else {
+            progressBar(0);
+            $('#progressBarChunk-modal').modal('hide');
+            $('#dwn').val(0);
+            flashMessages({
+                'type': 'warning',
+                'message': 'No existen registros para descargar'
+            });
+        }
+    }
+
+    $.ajax({
+        url: croute,
+        type: cmethod,
+        data: data
+    }).done(function(response) {
+        // console.log(response);
+        if (withDates && response.dates) {
+            var dateRanges = response.dates;
+            var allIds = {};
+            var totalNrows = 0;
+            var totalPages = 0;
+            var ajaxCalls = [];
+            var currentPage = 1;
+
+            dateRanges.forEach(function(range) {
+                var sizeData = data.slice();
+                sizeData.push({ name: 'dwn_action', value: 'get_size' });
+                sizeData.push({ name: 'with_dates', value: true });
+                sizeData.push({ name: 'start', value: range.start });
+                sizeData.push({ name: 'end', value: range.end });
+
+                var ajaxCall = $.ajax({
+                    url: croute,
+                    type: cmethod,
+                    data: sizeData
+                }).done(function(res) {
+                    totalNrows += res.nrows;
+                    totalPages += res.pages;
+
+                    if (res.ids) {
+                        for (var page in res.ids) {
+                            allIds[currentPage] = res.ids[page];
+                            currentPage++;
+                        }
+                    }
+                });
+
+                ajaxCalls.push(ajaxCall);
+            });
+
+            $.when.apply($, ajaxCalls).done(function() {
+                const consolidatedResponse = {
+                    nrows: totalNrows,
+                    pages: totalPages,
+                    ids: allIds
+                };
+
+                handleResponse(consolidatedResponse);
+            }).fail(function() {
+                progressBar(0);
+                $('#progressBarChunk-modal').modal('hide');
+                $('#dwn').val(0);
+                flashMessages({
+                    'type': 'error',
+                    'message': 'Ocurrió un error al obtener los datos.'
+                });
+            });
+        } else {
+            handleResponse(response);
+        }
+    });
+}
+
+function getChunk(i) {
+    // console.log(i);
+    var dwn_ids = [];
+    if( ids[i] ) dwn_ids = ids[i];
+    // console.log(dwn_ids);
+
+    var data = $('#' + cform_id).serializeArray();
+    data.push({ name: 'dwn_action', value: 'get_chunk' });
+    data.push({ name: 'dwn_page', value: i });
+    data.push({ name: 'dwn_nrows', value: nrows });
+    data.push({ name: 'dwn_ids', value: dwn_ids });
+
+    $.ajax({
+        url: croute,
+        type: cmethod,
+        data: data
+    }).done(function(res) {
+        // console.log(res);
+        blobs = blobs.concat(res);
+        // console.log(blobs);
+
+        var progress = parseInt((i/pages)*100);
+        progressBar(progress);
+
+        if(i < pages) {
+            getChunk(i + 1);
+        } else {
+            setTimeout(function() {
+                var finalData = convertToCSV(blobs);
+
+                progressBar(0);
+                $('#progressBarChunk-modal').modal('hide');
+
+                $('#dwn').val(0);
+                downloadCsv(finalData);
+            }, 500);
+        }
+    });
+}
+
+function writeChunk(i) {
+    var dwn_ids = [];
+    if( ids[i] ) dwn_ids = ids[i];
+
+    var data = $('#' + cform_id).serializeArray();
+    data.push({ name: 'dwn_action', value: 'get_chunk' });
+    data.push({ name: 'dwn_page', value: i });
+    data.push({ name: 'dwn_nrows', value: nrows });
+    data.push({ name: 'dwn_ids', value: dwn_ids });
+    data.push({ name: 'dwn_filename', value: cfileName });
+
+    $.ajax({
+        url: croute,
+        type: cmethod,
+        data: data
+    }).done(function(res) {
+        // console.log(res);
+        var progress = parseInt((i/pages)*100);
+        progressBar(progress);
+
+        if(i < pages) {
+            writeChunk(i + 1);
+        } else {
+            // console.log(res);
+            setTimeout(function() {
+                progressBar(0);
+                $('#progressBarChunk-modal').modal('hide');
+                $('#dwn').val(0);
+
+                window.location.href = res.downloadUrl;
+            }, 500);
+        }
+    });
+}
+
+// ###############
+// ##### PDF #####
+// ###############
+var ccompany_id;
+var cadmin;
+var cinterview;
+function generatePDF(route, company_id, form_id, admin, interview = 0) {
+    ccompany_id = company_id;
+    cform_id = form_id;
+    croute = route;
+    cadmin = admin;
+    cinterview = interview;
+
+    var params;
+    if( ccompany_id === 0 ) {
+        params = $('#' + cform_id).serialize() + `&interview=${cinterview}&action=get_size&admin=${cadmin}`;
+    } else {
+        params = {
+            'companyId': ccompany_id,
+            'action': 'get_size',
+            'interview': cinterview,
+            'admin': cadmin
+        };
+    }
+
+    $.ajax({
+        url: croute,
+        headers: { 'Access-Control-Allow-Origin': '*' },
+        type: "GET",
+        data: params
+    }).done(function(s) {
+        // console.log(s);
+        nrows = s.nrows;
+        pages = s.pages;
+
+        if(s.message) {
+            flashMessages({
+                'type': 'error',
+                'message': s.message
+            });
+            return;
+        }
+
+        if( nrows > 0 ) {
+            $('#progressBarChunk-modal').modal('show');
+
+            getApplication(1, 1);
+        } else {
+            progressBar(0);
+            $('#progressBarChunk-modal').modal('hide');
+
+            $('#dwn').val(0);
+            flashMessages({
+                'type': 'warning',
+                'message': 'No existen currículums para descargar'
+            });
+        }
+    });
+}
+
+function downloadLoadedPDF(route, form_id, company_id) {
+    croute = route;
+    cform_id = form_id;
+    ccompany_id = company_id;
+
+    var params;
+    if( ccompany_id === 0 ) {
+        params = $('#' + cform_id).serialize() + '&action=get_size';
+    } else {
+        params = {
+            'companyId': ccompany_id,
+            'action': 'get_size'
+        };
+    }
+
+    $.ajax({
+        url: croute,
+        headers: { 'Access-Control-Allow-Origin': '*' },
+        type: "GET",
+        data: params
+    }).done(function(s) {
+        nrows = s.nrows;
+        pages = s.pages;
+
+        if(s.message) {
+            flashMessages({
+                'type': 'error',
+                'message': s.message
+            });
+            return;
+        }
+
+        if( nrows > 0 ) {
+            $('#progressBarChunk-modal').modal('show');
+
+            getApplication(1, 2);
+        } else {
+            progressBar(0);
+            $('#progressBarChunk-modal').modal('hide');
+
+            flashMessages({
+                'type': 'warning',
+                'message': 'No existen currículums para descargar'
+            });
+        }
+    });
+}
+
+// type = 1 -> generate cvs
+// type = 2 -> loaded cvs
+function getApplication(i, type) {
+    // console.log(i);
+    var params;
+    if(type === 1) {
+        params = $('#' + cform_id).serialize();
+        params = params + "&" + $.param({
+            'companyId': ccompany_id,
+            'action': 'get_pdf',
+            'interview': cinterview,
+            'admin': cadmin,
+            'dwn_page': i,
+            'dwn_nrows': nrows
+        });
+    } else if(type === 2) {
+        params = $('#' + cform_id).serialize();
+        params = params + "&" + $.param({
+            'companyId': ccompany_id,
+            'action': 'get_pdf',
+            'dwn_page': i,
+            'dwn_nrows': nrows
+        });
+    }
+
+    $.ajax({
+        url: croute,
+        headers: { 'Access-Control-Allow-Origin': '*' },
+        type: "GET",
+        data: params
+    }).done(function(res) {
+        // console.log(res);
+        var progress = parseInt((i/pages)*100);
+        progressBar(progress);
+
+        if(i < pages) {
+            getApplication(i + 1, type);
+        } else {
+            progressBar(100);
+            setTimeout(function() {
+                if(type === 1) downloadPdfZip();
+                else if(type === 2) {
+                    window.location = croute + '?action=download_folder';
+                    progressBar(0);
+                    $('#progressBarChunk-modal').modal('hide');
+                }
+            }, 1000);
+        }
+    });
+}
+
+function downloadPdfZip() {
+    // console.log('download');
+    if( !$('input[name=companyId]').val() ) $('#' + cform_id).append("<input type='hidden' name='companyId' value='' />");
+    $('input[name=companyId]').val(ccompany_id);
+
+    progressBar(0);
+    $('#progressBarChunk-modal').modal('hide');
+
+    $('#dwn').val(3);
+    $('#' + cform_id).submit();
+    $('#dwn').val(0);
+}
+
+async function getPdfSingle(id, progress, formAction, type) {
+    progressBar(progress);
+
+    var data = {'action': 'get_pdf', 'userIds': [id]};
+    if (type === 'fair') {
+        data = {'action': 'get_pdf', 'applicationId': id};
+    }
+
+    return await $.ajax({
+        url: formAction,
+        headers: { 'Access-Control-Allow-Origin': '*' },
+        type: "GET",
+        data: data
+    });
+}
+
+// ###############
+// ### UPDATE ####
+// ###############
+function progressBarUpdate(progress) {
+    progressBarUpdateSteps(0,null, null);
+    $('#progressBarChunkUpdate').attr('aria-valuenow', progress);
+    $('#progressBarChunkUpdate').css('width', progress + "%");
+    $('#progressBarChunkUpdate').html(progress + "%");
+}
+
+function progressBarUpdateSteps(page, pages, nrows) {
+    if(pages) $('#progressBarChunkUpdate-steps').show();
+    else $('#progressBarChunkUpdate-steps').hide();
+    $('#progressBarChunkUpdate-steps').html(page + "/" + pages + " (" + nrows + ")");
+}
+
+function chunkUpdate(form_id, route, method, endRoute) {
+    cform_id = form_id;
+    croute = route;
+    eroute = endRoute;
+    cmethod = method;
+
+    var data = $('#' + cform_id).serializeArray();
+    data.push({ name: 'stage', value: 'get_stages' });
+    extra_data.forEach(function(item){
+        data.push({ name: item['name'], value: item['value'] });
+    });
+
+    $.ajax({
+        url: croute,
+        type: cmethod,
+        data: data
+    }).done(function(s) {
+        if(s.status === 'OK') {
+            stages = Object.values(s.stages);
+            if(s.extra_data){
+                extra_data = Object.values(s.extra_data);
+                // console.log(extra_data);
+            }
+
+            if (stages.length > 0) {
+                getChunkUpdate(0);
+            } else {
+                progressBarUpdate(0);
+                $('#progressBarChunkUpdate-modal').modal('hide');
+
+                flashMessages({
+                    'type': 'warning',
+                    'message': 'No hay nada que actualizar'
+                });
+                window.location = eroute;
+            }
+        }else{
+            progressBarUpdate(0);
+            $('#progressBarChunkUpdate-modal').modal('hide');
+            flashMessages(s.message);
+        }
+    });
+}
+
+function getChunkUpdate(i) {
+    $('#progress-stage').text(stages[i].message);
+
+    var data = $('#' + cform_id).serializeArray();
+    data.push({ name: 'stage', value: stages[i].stage });
+    if(stages[i].hasSteps){
+        data.push({ name: 'dwn_page', value: dwn_page });
+        data.push({ name: 'dwn_nrows', value: nrows });
+        var dwn_ids = [];
+        if( dwn_page > 0 && ids[dwn_page] ) dwn_ids = ids[dwn_page];
+        data.push({ name: 'dwn_ids', value: dwn_ids });
+    }
+    extra_data.forEach(function(item){
+        data.push({ name: item['name'], value: item['value'] });
+    });
+
+    $.ajax({
+        url: croute,
+        type: cmethod,
+        data: data
+    }).done(function(res) {
+        console.log(res);
+        if(res.status === 'OK') {
+            var progress = parseInt(((i+1)/stages.length)*100);
+            progressBarUpdate(progress);
+            if(res.extra_data){
+                extra_data = Object.values(res.extra_data);
+            }
+            if(res.pages) pages = parseInt(res.pages);
+            if(res.dwn_page) dwn_page = parseInt(res.dwn_page);
+            if(res.nrows) nrows = parseInt(res.nrows);
+            if(res.ids) ids = res.ids;
+
+            if(i < (stages.length - 1)) {
+                if(dwn_page && pages && dwn_page <= pages){
+                    progressBarUpdateSteps(dwn_page, pages, nrows);
+                    getChunkUpdate(i);
+                }else{
+                    dwn_page = 0;
+                    pages = null;
+                    nrows = null;
+                    ids = [];
+                    getChunkUpdate(i + 1);
+                }
+            } else {
+                setTimeout(function() {
+                    progressBarUpdate(0);
+                    $('#progressBarChunkUpdate-modal').modal('hide');
+                    window.location = eroute;
+                }, 500);
+            }
+        }else{
+            progressBarUpdate(0);
+            $('#progressBarChunkUpdate-modal').modal('hide');
+            flashMessages(res.message);
+        }
+    });
+}

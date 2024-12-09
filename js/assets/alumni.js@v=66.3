@@ -1,0 +1,1020 @@
+function JobOfferRefreshForm(jobOfferId){
+    CleanModal();
+    $mainModal.show();
+    $.ajax({
+        url:   Routing.generate('alumni_admin_refresh_job_offer', { 'jobOfferId' : jobOfferId }),
+        type:  'GET',
+            success:  function(response) {
+            RenderModal(response);
+            $('form').validator();
+        }
+    });
+}
+
+/**
+ * Created by gustavorevilla on 7/3/20
+ */
+function SearchStudentByIdentification() {
+    var institution = null;
+    var url = 'alumni_admin_internships_load_student_find';
+    if($('#institution').length > 0) {
+        institution = $('#institution').val();
+        url = 'associate_manager_load_student_find';
+    }
+
+    $.ajax({
+        url:   Routing.generate(url, { 'identification' : $('#studentIdentification').val(), 'portalSubId' :  $('#portalSubId').val(), 'institutionId' : institution }),
+        type:  'GET',
+        success:  function(response) {
+            if(!response.exist)
+            {
+                flashMessages({'type': 'error', 'message': response.message });
+                $('#studentInformation').hide();
+                $('#studentName').html('');
+                $('#studentIdentification').val('');
+                $('#studentIdentification').focus();
+            }
+            else {
+                var name = response.name;
+                var centre = response.centre;
+                var hasCentre = response.hasCentre;
+                if(response.studentInternship) {
+                    if(response.score)
+                        name = name + ' <span class="text-success">Registrado con una nota de <strong>' + response.score + '</strong></span>';
+                    else
+                        name = name + ' <span class="text-success">Registrado</span>';
+                    $('#saveStudentInternship').html('Actualizar Estudiante');
+                    $("#studentScore").val(response.score);
+                }
+                if(hasCentre) {
+                    if (centre != '' && centre != null)
+                        $("#studentCentre").val(centre);
+                }
+                else
+                    $("#divCentre").hide();
+
+                if(response.careers.length > 0 && $('#studentCareer').length){
+                    var careerSelect = $('#studentCareer');
+                    careerSelect.empty()
+                    $.each(response.careers, function(i, career) {
+                        if(career.id != response.currentCareer)
+                            careerSelect.append('<option value="' + career.id + '">' + career.name + '</option>');
+                        else
+                            careerSelect.append('<option value="' + career.id + '" selected="selected">' + career.name + '</option>');
+                    });
+                    $("#divCareer").show();
+                }
+                $('#studentName').html(name);
+                $('#studentInformation').show();
+            }
+        }
+    });
+}
+
+function cleanstudentIdentification() {
+    $('#studentInformation').hide();
+    $('#studentName').html('');
+    $('#saveStudentInternship').html('Registrar Estudiante');
+}
+
+function saveStudentInternship(url) {
+    var institution = null;
+    var urlPost = 'alumni_admin_internships_load_student_save';
+    if($('#institution').length > 0) {
+        institution = $('#institution').val();
+        urlPost = 'associate_manager_load_student_save';
+    }
+
+    var btnSave =$('#saveStudentInternship');
+    btnSave.html('Guardando');
+    btnSave.attr('disabled', 'disabled');
+    var data = {'rut' : $('#studentIdentification').val(), 'portalSubId' : $('#portalSubId').val(), 'score': $('#studentScore').val(), 'centre': $('#studentCentre').val(), 'career': $('#studentCareer').val() };
+    $.ajax({
+        url: Routing.generate(urlPost, {'url' : url, 'institutionId' : institution}),
+        type: "POST",
+        data: data,
+        success: function(response) {
+            if(response.saved) {
+                $('#studentInformation').hide();
+                $('#studentName').html('');
+                $('#studentIdentification').val('');
+                $('#studentScore').val('');
+                $('#studentCareer').prop('selectedIndex',0);
+                $('#studentIdentification').focus();
+                flashMessages({'type': 'success', 'message': 'Estudiante Guardado correctamente' });
+                btnSave.removeAttr('disabled');
+                btnSave.html('Registrar Estudiante');
+            }
+            else {
+                flashMessages({'type': 'error', 'message': 'Ocurrió un error' });
+                btnSave.removeAttr('disabled');
+                btnSave.html('Registrar Estudiante');
+            }
+        }
+    });
+}
+
+function ShowStudentProcessForm(processRequestId){
+    CleanModal();
+    $.ajax({
+        url: Routing.generate('alumni_admin_internship_form_show_answers', { 'processRequestId' : processRequestId }),
+        type: 'GET',
+        success: function(response) {
+            RenderModal(response);
+            $mainModal.show();
+            $('#main_modal').data('bs.modal').handleUpdate();
+            bindToggleable('toggle-handle','toggleable',true, true, true);
+        },
+        error: function(xhr, status, error) {
+            console.log(xhr.responseText);
+        }
+    });
+}
+
+function ShowStudentProcessFormToAssociate(processRequestId){
+    CleanModal();
+    $.ajax({
+        url: Routing.generate('associate_process_form_show_answers', { 'processRequestId' : processRequestId }),
+        type: 'GET',
+        success: function(response) {
+            RenderModal(response);
+            $mainModal.show();
+            $('#main_modal').data('bs.modal').handleUpdate();
+            bindToggleable('toggle-handle','toggleable',true, true, true);
+        },
+        error: function(xhr, status, error) {
+            console.log(xhr.responseText);
+        }
+    });
+}
+
+function ShowMyProcessForm(processRequestId){
+    CleanModal();
+    $.ajax({
+        url: Routing.generate('user_account_internships_form_show_answers', { 'processRequestId' : processRequestId }),
+        type: 'GET',
+        success: function(response) {
+            RenderModal(response);
+            $mainModal.show();
+            $('#main_modal').data('bs.modal').handleUpdate();
+            bindToggleable('toggle-handle','toggleable',true, true, true);
+        },
+        error: function(xhr, status, error) {
+            console.log(xhr.responseText);
+        }
+    });
+}
+
+function migrateJobOffers(portalSubId){
+    CleanModal();
+    $.ajax({
+        url: Routing.generate('alumni_admin_internship_migrate_jobOffers', { 'internshipId' : portalSubId }),
+        type: 'GET',
+        success: function(response) {
+            RenderModal(response);
+            $mainModal.show();
+            $('#main_modal').data('bs.modal').handleUpdate();
+            bindToggleable('toggle-handle','toggleable',true, true, true);
+        },
+        error: function(xhr, status, error) {
+            console.log(xhr.responseText);
+        }
+    });
+}
+
+/* EVALUATIONS */
+function cleanstudentIdentificationEvaluation() {
+    $('#studentInformation').hide();
+    $('#studentName').html('');
+    $('#saveStudentEvaluation').html('Registrar Estudiante');
+    $("#bossName").val('');
+    $("#bossEmail").val('');
+    $("#bossPhone").val('');
+    $("#bossPosition").val('');
+    $("#companyName").val('');
+}
+function EvaluationSearchStudentByIdentification() {
+    $.ajax({
+        url:   Routing.generate('alumni_admin_evaluation_process_load_student_find', { 'rut' : $('#studentIdentification').val(), 'processId' :  $('#processId').val() }),
+        type:  'GET',
+        success:  function(response) {
+            if(!response.exist)
+            {
+                flashMessages({'type': 'error', 'message': response.message });
+                $('#studentInformation').hide();
+                $('#studentName').html('');
+                $('#studentIdentification').val('');
+                $('#studentIdentification').focus();
+            }
+            else {
+                var name = response.name;
+                var bossName = response.bossName;
+                var bossEmail = response.bossEmail;
+                var bossPhone = response.bossPhone;
+                var bossPosition = response.bossPosition;
+                var companyName = response.companyName;
+                if(response.id) {
+                    name = name + ' <span class="text-success">Registrado</span>';
+                    $('#saveStudentEvaluation').html('Actualizar Estudiante');
+                    $("#bossName").val(bossName ? bossName : '');
+                    $("#bossEmail").val(bossEmail ? bossEmail : '');
+                    $("#bossPhone").val(bossEmail ? bossPhone : '');
+                    $("#bossPosition").val(bossPosition ? bossPosition : '');
+                    $("#companyName").val(companyName ? companyName : '');
+                }
+                $('#studentName').html(name);
+                $('#studentInformation').show();
+            }
+        }
+    });
+}
+
+function saveStudentEvaluation() {
+    var btnSave =$('#saveStudentEvaluation');
+    btnSave.html('Guardando');
+    btnSave.attr('disabled', 'disabled');
+    var data = {rut : $('#studentIdentification').val(), processId : $('#processId').val(), bossName : $('#bossName').val(), bossEmail : $('#bossEmail').val(), bossPhone : $('#bossPhone').val(), bossPosition : $('#bossPosition').val(), companyName : $('#companyName').val() };
+    $.ajax({
+        url: Routing.generate('alumni_admin_evaluation_process_load_student_save'),
+        type: "POST",
+        data: data,
+        success: function(response) {
+            if(response.saved) {
+                $('#studentInformation').hide();
+                $('#studentName').html('');
+                $('#bossName').val('');
+                $('#bossEmail').val('');
+                $('#bossPhone').val('');
+                $('#bossPosition').val('');
+                $('#companyName').val('');
+                $('#studentIdentification').val('');
+                $('#studentIdentification').focus();
+                flashMessages({'type': 'success', 'message': 'Estudiante guardado correctamente' });
+                btnSave.removeAttr('disabled');
+                btnSave.html('Registrar Estudiante');
+            }
+            else {
+                flashMessages({'type': 'error', 'message': 'Ocurrió un error' });
+                btnSave.removeAttr('disabled');
+                btnSave.html('Registrar Estudiante');
+            }
+        }
+    });
+}
+
+function DeleteStudentFromEvaluation(rut, processId) {
+    if(confirm('¿Desea borrar a este estudiante de la evaluación?')) {
+        $.ajax({
+            url: Routing.generate('alumni_admin_evaluation_process_student_delete', {'rut': rut, 'process': processId}),
+            type: 'GET',
+            success: function(response) {
+                if (!response.deleted) {
+                    flashMessages({'type': 'error', 'message': 'Ocurrió un error, por favor refresque y vuelva a intentarlo' });
+                }
+                else {
+                   flashMessages({'type': 'success', 'message': 'Estudiante borrado de la evalucación' });
+                    $('.identification-' + rut).hide();
+                }
+            }
+        });
+    }
+}
+
+function ShowStudentEvaluation(studentFormId){
+    CleanModal();
+    $.ajax({
+        url: Routing.generate('alumni_admin_evaluation_process_student_show_evaluation', { 'studentFormId' : studentFormId }),
+        type: 'GET',
+        success: function(response) {
+            RenderModal(response);
+            $mainModal.show();
+            bindToggleable('toggle-handle','toggleable',true, true, true);
+        },
+        error: function(xhr, status, error) {
+            console.log(xhr.responseText);
+        }
+    });
+}
+
+function ShowStudentEvaluationUser(studentFormId){
+    CleanModal();
+    $.ajax({
+        url: Routing.generate('user_account_internships_show', { 'studentFormId' : studentFormId }),
+        type: 'GET',
+        success: function(response) {
+            RenderModal(response);
+            $mainModal.show();
+            $('#main_modal').data('bs.modal').handleUpdate();
+            bindToggleable('toggle-handle','toggleable',true, true, true);
+        },
+        error: function(xhr, status, error) {
+            console.log(xhr.responseText);
+        }
+    });
+}
+
+function OpenSendCandidatesToCompany(companyId, jobOfferId) {
+    CleanModal();
+    $mainModal.show();
+    $.ajax({
+        url:   Routing.generate('alumni_admin_internships_send_candidates', { 'companyId' : companyId, 'jobOfferId' : jobOfferId }),
+        type:  'GET',
+        success:  function(response) {
+            RenderModal(response);
+            $('form').validator();
+        }
+    });
+}
+
+function AssignStudentToInternship(rut, portalSub) {
+    CleanModal();
+    $mainModal.show();
+    $.ajax({
+        url:   Routing.generate('alumni_admin_internships_student_assign', { 'rut' : rut, 'portalSubId' : portalSub }),
+        type:  'GET',
+        success:  function(response) {
+            RenderModal(response);
+            $('form').validator();
+        }
+    });
+}
+
+function PauseInternship(rut, portalSub, state) {
+    CleanModal();
+    $mainModal.show();
+    $.ajax({
+        url:   Routing.generate('alumni_admin_internships_student_pause', { 'rut' : rut, 'portalSubId' : portalSub, 'state' : state }),
+        type:  'GET',
+        success:  function(response) {
+            RenderModal(response);
+            $('form').validator();
+        }
+    });
+}
+
+function RequirementsInternship(rut, portalSub) {
+    CleanModal();
+    $mainModal.show();
+    $.ajax({
+        url:   Routing.generate('alumni_admin_internships_student_requirements', { 'rut' : rut, 'portalSubId' : portalSub }),
+        type:  'GET',
+        success:  function(response) {
+            RenderModal(response);
+            $('form').validator();
+        }
+    });
+}
+
+function CommentInternship(rut, portalSub) {
+    CleanModal();
+    $mainModal.show();
+    $.ajax({
+        url:   Routing.generate('alumni_admin_internships_student_comment', { 'rut' : rut, 'portalSubId' : portalSub }),
+        type:  'GET',
+        success:  function(response) {
+            RenderModal(response);
+            $('form').validator();
+        }
+    });
+}
+
+function OpenApplyForInternship(){
+    CleanModal();
+    $mainModal.show();
+    $.ajax({
+        url:   Routing.generate('company_my_apply_internship_form'),
+        type:  'GET',
+        success:  function(response) {
+            RenderModal(response);
+            $('form').validator();
+        }
+    });
+}
+
+function OpenAddArea(){
+    CleanModal();
+    $mainModal.show();
+    $.ajax({
+        url:   Routing.generate('company_my_add_area_form'),
+        type:  'GET',
+        success:  function(response) {
+            RenderModal(response);
+            $('form').validator();
+        }
+    });
+}
+
+function ApproveRefuseCompanyForInternship(typeId, companyId, state){
+    if(confirm('Desea ' + (state == 0 ? 'rechazar' : 'aprobar') + ' esta organización?')) {
+        $.ajax({
+            url: Routing.generate('alumni_admin_approve_refuse_internship_company', {
+                'typeId': typeId,
+                'companyId': companyId,
+                'state': state
+            }),
+            type: 'GET',
+            success: function (response) {
+                if (response.updated) {
+                    var msg = '';
+                    if (state == 1)
+                        msg = 'Empresa aprobada correctamente';
+                    else
+                        msg = 'Empresa rechazada correctamente';
+
+                   flashMessages({'type': 'success', 'message': msg });
+                    $('#trCompany' + companyId).hide();
+                }
+            }
+        });
+    }
+}
+
+function ApproveInitialReportForInternship(internshipStudentId){
+    if(confirm('¿Desea aprobar los documentos de formalización?')) {
+        $.ajax({
+            url: Routing.generate('alumni_admin_approve_initial_report', {
+                'internshipStudentId': internshipStudentId
+            }),
+            type: 'GET',
+            success: function (response) {
+                if (response.updated) {
+                    var msg = 'Documentos aprobados correctamente';
+                   flashMessages({'type': 'success', 'message': msg });
+                    $('#btnApprove' + internshipStudentId).hide();
+                    $('#tdState' + internshipStudentId).html('Aprobado');
+                }
+            }
+        });
+    }
+}
+
+function RejectInitialReportForInternship(internshipStudentId){
+    if(confirm('¿Desea rechazar documentos de formalización?')) {
+        var reason = prompt('Indique brevemente la razón del rechazo');
+        if(reason.length > 1) {
+            $.ajax({
+                url: Routing.generate('alumni_admin_reject_initial_report', {
+                    'internshipStudentId': internshipStudentId
+                }),
+                type: "POST",
+                data: {
+                    reason: reason
+                },
+                success: function (response) {
+                    if (response.updated) {
+                        var msg = 'Documentos rechazados correctamente';
+                        flashMessages({'type': 'success', 'message': msg });
+                        $('#btnApprove' + internshipStudentId).hide();
+                        $('#btnReject' + internshipStudentId).hide();
+                        $('#btnCancel' + internshipStudentId).hide();
+                        $('#tdState' + internshipStudentId).html('Rechazado');
+                    }
+                }
+            });
+        }
+    }
+}
+
+function CancelInitialReportForInternship(internshipStudentId){
+    if(confirm('¿Desea anular los documentos de formalización?')) {
+        var reason = prompt('Indique brevemente la razón de la anulación');
+        if(reason.length > 1) {
+            $.ajax({
+                url: Routing.generate('alumni_admin_cancel_initial_report', {
+                    'internshipStudentId': internshipStudentId
+                }),
+                type: "POST",
+                data: {
+                    reason: reason
+                },
+                success: function (response) {
+                    if (response.updated) {
+                        var msg = 'Documentos anulados correctamente';
+                        flashMessages({'type': 'success', 'message': msg });
+                        $('#btnApprove' + internshipStudentId).hide();
+                        $('#btnReject' + internshipStudentId).hide();
+                        $('#btnCancel' + internshipStudentId).hide();
+                        $('#tdState' + internshipStudentId).html('Anulado');
+                    }
+                }
+            });
+        }
+    }
+}
+function OpenViewStudentPreferences(rut, portalSub){
+    CleanModal();
+    $mainModal.show();
+    $.ajax({
+        url:   Routing.generate('alumni_admin_internships_student_view_preferences', {'rut': rut, 'portalSub': portalSub}),
+        type:  'GET',
+        success:  function(response) {
+            RenderModal(response);
+            $('form').validator();
+        }
+    });
+}
+
+function OpenViewStudentApplications(user, portalSub){
+    CleanModal();
+    $mainModal.show();
+    $.ajax({
+        url:   Routing.generate('alumni_admin_internships_student_view_applications', {'userId': user, 'portalSub': portalSub}),
+        type:  'GET',
+        success:  function(response) {
+            RenderModal(response);
+            $('form').validator();
+        }
+    });
+}
+
+function OpenViewStudentApplicationsAssociate(user, portalSub){
+    CleanModal();
+    $mainModal.show();
+    $.ajax({
+        url:   Routing.generate('associate_internships_student_view_applications', {'userId': user, 'portalSub': portalSub}),
+        type:  'GET',
+        success:  function(response) {
+            RenderModal(response);
+            $('form').validator();
+        }
+    });
+}
+
+function OpenManageInterview(applicationId, baseRoute){
+    CleanModal();
+    $mainModal.show();
+    $.ajax({
+        url:   Routing.generate(baseRoute + 'manage_interview_form', {'applicationId': applicationId}),
+        type:  'GET',
+        success:  function(response) {
+            RenderModal(response);
+            $('form').validator();
+        }
+    });
+}
+
+function DeleteManageInterview(interviewId, baseRoute){
+    if(confirm('¿Desea borrar esta entrevista?')) {
+        CleanModal();
+        $.ajax({
+            url: Routing.generate(baseRoute + 'manage_delete_interview_form', {'interviewId': interviewId}),
+            type: 'GET',
+            success: function(response) {
+                flashMessages({'type': 'success', 'message': 'Entrevista borrada correctamente' });
+                location.reload();
+            }
+        });
+    }
+}
+
+function OpenSelectCandidate(application, baseRoute){
+    CleanModal();
+    $mainModal.show();
+    $.ajax({
+        url: Routing.generate(baseRoute + 'job_select_candidate', {'applicationId' : application}),
+        type: 'GET',
+        success:  function(response) {
+            RenderModal(response);
+            $('form').validator();
+        }
+    });
+}
+
+function OpenUnSelectCandidate(application, baseRoute){
+    CleanModal();
+    $mainModal.show();
+    $.ajax({
+        url:   Routing.generate(baseRoute + 'job_unselect_candidate', {'applicationId' : application}),
+        type:  'GET',
+        success:  function(response) {
+            RenderModal(response);
+            $('form').validator();
+        }
+    });
+}
+
+function convertTZ(date, tzString) {
+    return new Date((typeof date === "string" ? new Date(date) : date).toLocaleString("en-US", {timeZone: tzString}));
+}
+
+function chatMercureSendMessage() {
+    var btnSend = $('#chatSendMessage');
+    btnSend.html('Enviando...');
+    btnSend.attr('disabled', 'disabled');
+
+    $.ajax({
+        url: Routing.generate('chat_send_message'),
+        type: "POST",
+        data: {
+            message : $('#message').val(),
+            userName : $('#userName').val(),
+            chatId: $('#chatId').val(),
+            chatHash: $('#chatHash').val(),
+            userId: $('#userId').val(),
+        },
+        success: function(response) {
+            if(response.isValid) {
+                $('#message').val('');
+                btnSend.removeAttr('disabled');
+                btnSend.html('Enviar');
+            }
+            else {
+                flashMessages({'type': 'error', 'message': 'Ocurrió un error' });
+            }
+        }
+    });
+}
+
+function chatSendMessage() {
+    var btnSend = $('#chatSendMessage');
+    btnSend.html('Enviando...');
+    btnSend.attr('disabled', 'disabled');
+
+    var data = {message : $('#message').val(), userName : $('#userName').val(), chatId: $('#chatId').val(), chatHash: $('#chatHash').val() };
+    $.ajax({
+        url: Routing.generate('chat_send_message'),
+        type: "POST",
+        data: data,
+        success: function(response) {
+            if(response.isValid) {
+                if(response.messages.length > 0){
+                    var m = Array.from(response.messages);
+                    var newLastId = 0;
+                    var timeZone = response.timeZone;
+                    for(i=0;i<m.length;i++){
+                        var d = new Date(m[i].createdAt.date);
+                        d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate(), d.getHours(), d.getMinutes(), 0));
+                        d = convertTZ(d, timeZone);
+                        var theMonth = d.getMonth() + 1;
+                        var divHtml = ` <div class="row">
+                                            <div class="col-lg-12">
+                                                <div class="media">
+                                                    <a class="pull-left" href="#">
+                                                        <img class="media-object img-circle img-chat" src="//reqlut2.s3.amazonaws.com/uploads/perfil/default.jpg" alt="">
+                                                    </a>
+                                                    <div class="media-body">
+                                                        <span class="media-heading">${m[i].userName}
+                                                            <span class="small pull-right">${(d.getDate() <10 ? '0' + d.getDate() : d.getDate()) + '-' + (theMonth <10 ? '0' + theMonth : theMonth)  + '-' + d.getFullYear() + ' ' + d.getHours() + ':' + d.getMinutes()}</span>
+                                                        </span>
+                                                        <p>${m[i].message}</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <hr>`;
+                        newLastId = m[i].id;
+                        $("#chat-messages").append(divHtml);
+                        $("#chat-messages").scrollTop($("#chat-messages")[0].scrollHeight);
+                    }
+                    $('#message').val('');
+                    btnSend.removeAttr('disabled');
+                    btnSend.html('Enviar');
+                    $lastId = newLastId;
+                }
+            }
+            else {
+                flashMessages({'type': 'error', 'message': 'Ocurrió un error' });
+                btnSend.removeAttr('disabled');
+                btnSend.html('Registrar Estudiante');
+            }
+        }
+    });
+}
+
+function chatLoadMessages() {
+    $.ajax({
+        url: Routing.generate('chat_load_messages', {'id': $('#chatId').val(), 'hash': $('#chatHash').val(), 'lastId' : $lastId}),
+        type: 'GET',
+        success: function(response) {
+            if(response.isValid) {
+                if(response.messages.length > 0){
+                    var m = Array.from(response.messages);
+                    var newLastId = 0;
+                    for(i=0;i<m.length;i++){
+                        var d = new Date(m[i].createdAt.date);
+                        var theMonth = d.getMonth() + 1;
+                        var divHtml = '<div class="chat-message"><div class="chat-author">' + m[i].userName + ':</div>' +
+                            '                <div class="clearfix"></div>' +
+                            '                ' + m[i].message +
+                            '                <div class="clearfix"></div>' +
+                            '                <div class="chat-date">' + (d.getDate() <10 ? '0' + d.getDate() : d.getDate()) + '-' + (theMonth <10 ? '0' + theMonth : theMonth)  + '-' + d.getFullYear() + ' ' + d.getHours() + ':' + d.getMinutes() + '</div></div>'
+                        newLastId = m[i].id;
+                        $("#chat-messages").append(divHtml);
+                        $("#chat-messages").scrollTop($("#chat-messages")[0].scrollHeight);
+                    }
+                    $lastId = newLastId;
+                }
+            }
+        }
+    });
+}
+
+function OpenManageMeeting(roomId){
+    CleanModal();
+    $mainModal.show();
+    $.ajax({
+        url:   Routing.generate('alumni_advisor_new_meeting', {'roomId': roomId}),
+        type:  'GET',
+        success:  function(response) {
+            RenderModal(response);
+            $('form').validator();
+        }
+    });
+}
+
+function DeleteMeeting(meetingId){
+    if(confirm('Desea borrar esta reunión?')) {
+        CleanModal();
+        $.ajax({
+            url: Routing.generate('alumni_advisor_delete_meeting', {'meetingId': meetingId}),
+            type: 'GET',
+            success: function(response) {
+                flashMessages({'type': 'success', 'message': 'Reunión borrada correctamente' });
+                location.reload();
+            }
+        });
+    }
+}
+
+function OpenManageBooked(roomId, bookedId){
+    CleanModal();
+    $mainModal.show();
+    $.ajax({
+        url:   Routing.generate('alumni_advisor_schedule_meeting', {'roomId': roomId, 'bookedId' : bookedId}),
+        type:  'GET',
+        success:  function(response) {
+            RenderModal(response);
+            $('form').validator();
+        }
+    });
+}
+
+function DeleteBooked(roomId, bookedId){
+    if(confirm('Desea cancelar esta reunión? esta acción no puede ser revertida')) {
+        CleanModal();
+        $.ajax({
+            url: Routing.generate('alumni_advisor_schedule_delete_meeting', {'roomId': roomId, 'bookedId' : bookedId}),
+            type: 'GET',
+            success: function(response) {
+                flashMessages({'type': 'success', 'message': 'Reunión cancelada correctamente' });
+                location.reload();
+            }
+        });
+    }
+}
+
+
+function OpenAdminManageBooked(requestId){
+    CleanModal();
+    $mainModal.show();
+    $.ajax({
+        url:   Routing.generate('alumni_admin_advisor_request_pending_assign', {'advisorRequestId': requestId}),
+        type:  'GET',
+        success:  function(response) {
+            RenderModal(response);
+            $('form').validator();
+        }
+    });
+}
+
+function OpenAdminManageAdvisorRequest(requestId){
+    CleanModal();
+    $mainModal.show();
+    $.ajax({
+        url:   Routing.generate('alumni_admin_advisor_request_pending_assign', {'advisorRequestId': requestId}),
+        type:  'GET',
+        success:  function(response) {
+            RenderModal(response);
+            $('form').validator();
+        }
+    });
+}
+
+function ShowAdvisorShowPoll(advisorPollId){
+    CleanModal();
+    $.ajax({
+        url: Routing.generate('alumni_admin_advisor_show_poll', { 'advisorPollId' : advisorPollId }),
+        type: 'GET',
+        success: function(response) {
+            RenderModal(response);
+            $mainModal.show();
+            $('#main_modal').data('bs.modal').handleUpdate();
+            bindToggleable('toggle-handle','toggleable',true, true, true);
+        },
+        error: function(xhr, status, error) {
+            console.log(xhr.responseText);
+        }
+    });
+}
+
+function ShowAdvisorShowBasicPoll(roomId){
+    CleanModal();
+    $.ajax({
+        url: Routing.generate('alumni_admin_advisor_show_basic_poll', { 'roomId' : roomId }),
+        type: 'GET',
+        success: function(response) {
+            RenderModal(response);
+            $mainModal.show();
+            $('#main_modal').data('bs.modal').handleUpdate();
+            bindToggleable('toggle-handle','toggleable',true, true, true);
+        },
+        error: function(xhr, status, error) {
+            console.log(xhr.responseText);
+        }
+    });
+}
+
+function NetworkingMercureSendMessage(type) {
+    var btnSend;
+    var message;
+    var contactId;
+    if(type === 1) {
+        btnSend = $('#btnSendMessage');
+        message = $('#message');
+        contactId = $('#contact');
+    }
+    else if(type === 2) {
+        btnSend = $('#btnChatSendMessage');
+        message = $('#chatMessage');
+        contactId = $('#contactId');
+    }
+    btnSend.html('Enviando...');
+    btnSend.attr('disabled', 'disabled');
+
+    $.ajax({
+        url: Routing.generate('user_networking_contact_message_new', {'contactId': contactId.val()}),
+        type: "POST",
+        data: {
+            message: message.val()
+        },
+        success: function(response) {
+            if(response.isValid) {
+                message.val('');
+                btnSend.removeAttr('disabled');
+                btnSend.html('Enviar');
+            }
+            else {
+                flashMessages({'type': 'error', 'message': 'Ocurrió un error' });
+                btnSend.removeAttr('disabled');
+                btnSend.html('Enviar');
+            }
+        }
+    });
+}
+
+function NetworkingSendMessage() {
+    var btnSend = $('#btnSendMessage');
+    btnSend.html('Enviando...');
+    btnSend.attr('disabled', 'disabled');
+
+    var data = {message : $('#message').val(), lastId : $lastId };
+    $.ajax({
+        url: Routing.generate('user_networking_contact_message_new', {'contactId': $('#contact').val()}),
+        type: "POST",
+        data: data,
+        success: function (response) {
+            if(response.isValid) {
+                if(response.messages.length > 0){
+                    var m = Array.from(response.messages);
+                    var newLastId = 0;
+                    for(i=0;i<m.length;i++){
+                        var d = new Date(m[i].createdAt.date);
+                        d.setTime( d.getTime() - new Date().getTimezoneOffset()*60*1000 );
+                        var theMonth = getMonthInitials(d.getUTCMonth() + 1);
+                        var divHtml = '<div class="messages-wall-message">' +
+                            '                <p class="from-' + m[i].creator + '">' +
+                            '                ' + m[i].message +
+                            '                </p>' +
+                            '                <div class="messages-wall-message-date message-from-' + m[i].creator + '">' + (d.getDate() <10 ? '0' + d.getDate() : d.getDate()) + ' ' + theMonth  + ' ' + d.getFullYear() + ' ' + d.getHours() + ':' + d.getMinutes() + '</div>' +
+                            '<div class="messages-wall-message-photo message-from-' + m[i].creator + '" style="background: url(//reqlut2.s3.amazonaws.com/uploads/perfil/' + m[0].photo + ');"></div>' +
+                            '</div>';
+                        newLastId = m[i].id;
+                        $(".messages-wall").append(divHtml);
+                        $(".messages-wall").scrollTop($(".messages-wall")[0].scrollHeight);
+                    }
+                    $('#message').val('');
+                    $('.emoji-wysiwyg-editor').html('');
+                    const localDate = new Date();
+                    $('#lastUpdate').html(localDate.getHours() + ':' + (localDate.getMinutes() <10 ? '0' + localDate.getMinutes() : localDate.getMinutes()) + ':' + (localDate.getSeconds() < 10 ? '0' + localDate.getSeconds() : localDate.getSeconds()));
+                    btnSend.removeAttr('disabled');
+                    btnSend.html('Enviar');
+                    $lastId = newLastId;
+                }
+            }
+            else {
+                flashMessages({'type': 'error', 'message': 'Ocurrió un error' });
+                btnSend.removeAttr('disabled');
+                btnSend.html('Enviar');
+            }
+        }
+    });
+}
+
+function getMonthInitials(month){
+    switch (month){
+        case 1:
+            return 'Ene';
+        case 2:
+            return 'Feb';
+        case 3:
+            return 'Mar';
+        case 4:
+            return 'Abr';
+        case 5:
+            return 'May';
+        case 6:
+            return 'Jun';
+        case 7:
+            return 'Jul';
+        case 8:
+            return 'Ago';
+        case 9:
+            return 'Sep';
+        case 10:
+            return 'Oct';
+        case 11:
+            return 'Nov';
+        case 12:
+            return 'Dic';
+    }
+}
+
+function NetworkingLoadMessages() {
+    $.ajax({
+        url: Routing.generate('user_networking_contact_messages_load', {'contactId': $('#contact').val(), 'lastId' : $lastId}),
+        type: "GET",
+        success: function (response) {
+            if(response.isValid) {
+                if(response.messages.length > 0){
+                    var m = Array.from(response.messages);
+                    var newLastId = 0;
+                    for(i=0;i<m.length;i++){
+                        var d = new Date(m[i].createdAt.date);
+                        d.setTime( d.getTime() - new Date().getTimezoneOffset()*60*1000 );
+                        var theMonth = getMonthInitials(d.getUTCMonth() + 1);
+                        var divHtml = '<div class="messages-wall-message">' +
+                            '                <p class="from-' + m[i].creator + '">' +
+                            '                ' + m[i].message +
+                            '                </p>' +
+                            '                <div class="messages-wall-message-date message-from-' + m[i].creator + '">' + (d.getDate() <10 ? '0' + d.getDate() : d.getDate()) + ' ' + theMonth  + ' ' + d.getFullYear() + ' ' + d.getHours() + ':' + d.getMinutes() + '</div>' +
+                            '<div class="messages-wall-message-photo message-from-' + m[i].creator + '" style="background: url(//reqlut2.s3.amazonaws.com/uploads/perfil/' + m[0].photo + ');"></div>' +
+                            '</div>';
+                        newLastId = m[i].id;
+                        $(".messages-wall").append(divHtml);
+                        $(".messages-wall").scrollTop($(".messages-wall")[0].scrollHeight);
+                    }
+                    $('#message').val('');
+                    const localDate = new Date();
+                    $('#lastUpdate').html(localDate.getHours() + ':' + (localDate.getMinutes() <10 ? '0' + localDate.getMinutes() : localDate.getMinutes()) + ':' + (localDate.getSeconds() < 10 ? '0' + localDate.getSeconds() : localDate.getSeconds()));
+                    $lastId = newLastId;
+                }
+                else{
+                    const localDate = new Date();
+                    $('#lastUpdate').html(localDate.getHours() + ':' + (localDate.getMinutes() <10 ? '0' + localDate.getMinutes() : localDate.getMinutes()) + ':' + (localDate.getSeconds() < 10 ? '0' + localDate.getSeconds() : localDate.getSeconds()));
+                }
+            }
+        }
+    });
+}
+
+function NetworkingBlockUnblock(userId, active) {
+    $.ajax({
+        url: Routing.generate('alumni_admin_networking_block_unblock', {'userId' : userId, 'state' : active }),
+        success: function (response) {
+            if(response.updated) {
+                if(active == 1){
+                    $("#block" + userId).hide();
+                    $("#limits" + userId).hide();
+                    $("#unblock" + userId).show();
+                }
+                else {
+                    $("#block" + userId).show();
+                    $("#limits" + userId).show();
+                    $("#unblock" + userId).hide();
+                }
+
+                flashMessages({'type': 'success', 'message': (active == 1 ? 'Usuario bloqueado correctamente' : 'Usuario desbloqueado correctamente') });
+            }
+            else {
+                flashMessages({'type': 'error', 'message': 'Ocurrió un error' });
+            }
+        }
+    });
+}
+
+function NetworkingChangeLimits(userId) {
+    CleanModal();
+    $.ajax({
+        url: Routing.generate('alumni_admin_networking_change_limits', { 'userId' : userId }),
+        type: "GET",
+        success: function (response) {
+            RenderModal(response);
+            $mainModal.show();
+            $('#main_modal').data('bs.modal').handleUpdate();
+            bindToggleable('toggle-handle','toggleable',true, true, true);
+        },
+        error: function(xhr, status, error) {
+            console.log(xhr.responseText);
+        }
+    });
+}

@@ -1,0 +1,37 @@
+/* NEW/EDIT */
+.form-question { padding-top: 10px; padding-left: 10px; padding-right: 10px; padding-bottom: 40px; margin-bottom: 20px; border: 2px solid #e9e9e9; }
+.form-question .header{margin-bottom: 10px;}
+.select2-container--default .select2-selection--single{ height: 40px; line-height: 1.5;}
+.select2-container--default .select2-selection--single .select2-selection__arrow{height: 40px;}
+.input-group.display-inline-flex .input-group-text{min-width: 80px; line-height: inherit;}
+
+/* VIEW */
+.form-question-view{padding: 10px; border: 2px solid #e9e9e9; margin-bottom: 20px;}
+.form-question-view div{padding: 5px 0; color: #000;}
+.form-question-view .question-type{font-size: 16px;}
+.form-question-view .question-text{font-size: 14px;}
+.form-description{padding: 10px; border: 2px solid #eaeaea; margin-bottom: 20px;}
+
+h3.header-secondary{font-size: 16px; font-style: italic; margin-top: 10px;}
+
+.profiles .form-profile-view{padding: 10px; border: 2px solid #e9e9e9; margin-bottom: 20px;}
+.profiles .form-profile-view .profile-name{font-size: 16px;}
+.profiles .form-profile-view .profile-text{font-size: 14px;}
+
+
+/* ANSWER */
+.form-question-answer{padding: 20px 20px; margin: 20px 0; font-size: 14px; color: #484848;}
+.form-question-answer.question-border{border: 2px solid #e9e9e9;}
+.form-question-answer .question-title{color: #000; text-align: center;}
+.form-question-answer .question{color: #000; text-align: justify; font-size: 14px; margin-bottom: 20px;}
+.form-question-answer .question label{color: #000; text-align: justify; font-size: 14px;}
+.form-question-answer .input{margin-left: 35px;}
+
+/* SCORE */
+.floatingScore{position: fixed; top: 50%; right: 0; background: #1a1a1a; color: white; text-align: center; padding: 10px 20px; font-size: 18px; }
+
+.form-question-answer .more-less-table tr th:not(:first-child), .form-question-answer .more-less-table tr td:not(:first-child){text-align: center;}
+.form-question-answer .more-less-table input[type=radio].more:checked + label:before{font-family: "FontAwesome"; content: "\f00c"; color: green;}
+.form-question-answer .more-less-table input[type=radio].less:checked + label:before{font-family: "FontAwesome"; content: "\f00d"; color: red;}
+
+

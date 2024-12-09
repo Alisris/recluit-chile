@@ -1,0 +1,70 @@
+span.twitter-typeahead .tt-dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    z-index: 1000;
+    display: none;
+    float: left;
+    width: 100%;
+    padding: 0;
+    margin: 2px 0 0;
+    list-style: none;
+    font-size: 12px;
+    text-align: left;
+    color: #484848;
+    font-weight: 300;
+    background-color: #fff;
+    border-radius: 0;
+    -webkit-box-shadow: 0 6px 12px #eaeaea;
+    box-shadow: 0 6px 12px #eaeaea;
+    background-clip: padding-box;
+}
+span.twitter-typeahead .tt-suggestion{
+    display: block;
+    padding: 10px 20px 10px 10px;
+    margin-bottom: 0;
+    clear: both;
+    font-weight: 300;
+    white-space: nowrap;
+}
+
+span.twitter-typeahead .tt-suggestion:after{
+    clear: both;
+}
+
+span.twitter-typeahead .tt-suggestion:hover,
+span.twitter-typeahead .tt-suggestion:focus {
+    text-decoration: none;
+    outline: 0;
+    background-color: #eaeaea;
+    /*border: 1px solid #484848;*/
+    /*border-radius: 10px;*/
+}
+span.twitter-typeahead .tt-suggestion.tt-cursor {
+    color: #484848;
+    background-color: #eaeaea;
+}
+span.twitter-typeahead {
+    width: 100%;
+}
+.input-group span.twitter-typeahead {
+    display: block !important;
+}
+.input-group span.twitter-typeahead .tt-dropdown-menu {
+    top: 32px !important;
+}
+.input-group.input-group-lg span.twitter-typeahead .tt-dropdown-menu {
+    top: 44px !important;
+}
+.input-group.input-group-sm span.twitter-typeahead .tt-dropdown-menu {
+    top: 28px !important;
+}
+
+.thumbs{position: relative;}
+.thumb-uni{height: 30px; width: 30px; margin-right: 10px; margin-left: 0; float: left; display: inline;}
+.thumb-container{height: 40px; width: 60px; margin-right: 10px; margin-left: 0; float: left; display: inline; background-size: cover; background-repeat: no-repeat; background-position: 50% 50%;}
+.thumb-text{position: absolute; top: 10px; left: 80px;}
+.thumb-container-large{height: 60px; width: 60px; margin-right: 10px; margin-left: 0; float: left; display: inline; background-size: contain; background-repeat: no-repeat; background-position: 50% 50%;}
+.thumb-text-large{position: absolute; top: 20px; left: 80px;}
+.empty-message{padding: 5px 10px; cursor:pointer;}
+.ta-hint{font-size: 11px; color: #7c7c7c;}

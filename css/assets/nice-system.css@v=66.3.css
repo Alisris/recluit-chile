@@ -1,0 +1,119 @@
+/*
+*   CARDS
+*/
+.nice-list .nice-list-title{display:block; text-align:center; font-size: 28px; font-weight: 600; color: #62a7d8; padding: 10px 0; width: 100%}
+.nice-list .nice-card{margin: 20px 10px; border: 1px solid #d9d9d9; border-radius: 3px; padding: 0; overflow: hidden;position: relative !important;}
+.nice-list .nice-card.circle{border-radius: 20px; -webkit-box-shadow: 0 1px 1px 0 #808080, 0 1px 1px 0 #808080; box-shadow: 0 1px 1px 0 #808080, 0 1px 1px 0 #808080;}
+.nice-list .nice-card.nice-card-border{margin: 10px 10px; -webkit-box-shadow: none; box-shadow: none; border: 1px solid #eee; padding: 0; border-radius: 20px;}
+.nice-list .nice-card.highlight{transform: scale(1.04);transition: 300ms; -webkit-box-shadow: 0 3px 6px 0 #808080, 0 3px 12px 0 #808080; box-shadow: 0 3px 6px 0 #808080, 0 3px 12px 0 #808080;}
+.nice-list .nice-card.nice-card-border.highlight{transform: scale(1.04);transition: 300ms; -webkit-box-shadow: none; box-shadow: none;}
+.nice-list .nice-card.highlight.jobcategory-card{transform: scale(1.04);transition: 300ms; -webkit-box-shadow: 0 2px 2px 0 #808080, 0 2px 2px 0 #808080; box-shadow: 0 2px 2px 0 #808080, 0 2px 2px 0 #808080; background-color: #f3920085}
+.nice-list .nice-card .nice-switch-top{position: absolute; top: 5px; right: 5px;}
+.nice-hint{ font-size: 13px; color: #777;}
+
+.nice-list .nice-card.nice-card-portal{text-align: center;}
+.nice-list .nice-card.nice-card-portal .nice-buttons{text-align: center;}
+
+.nice-list .nice-card .nice-image img{width:100%; opacity: 1; border-top-left-radius: 3px; border-top-right-radius: 3px; padding: 20px;}
+.nice-list .nice-card .nice-image.logo img{max-height: 80px; width: inherit; max-width: 100%; padding: 10px; padding-top: 30px;}
+.nice-list .nice-card.nice-card-simple .nice-background{height: 250px; width:100%; opacity: 1; border-top-left-radius: 3px; border-top-right-radius: 3px; padding: 20px;}
+.nice-list .nice-card.nice-card-border .nice-background{height: 160px; width:100%; opacity: 1;}
+.nice-list .nice-card.nice-card-simple .nice-image img{padding: 0}
+.nice-list .nice-card .nice-image img:hover{opacity: 0.7; -webkit-transition: all .4s ease-in-out; transition: all .4s ease-in-out;}
+
+.nice-list .nice-card .nice-category{color: #fff; position: absolute; top: 10px; left: 1px; padding: 2px 10px 2px 5px; background: #000; font-size: 16px;}
+.nice-list .nice-card.nice-card-border .nice-card-content .nice-category{font-size: 14px;}
+.nice-list .nice-card .nice-price{color: #fff; position: absolute; bottom: 10px; right: 1px; padding: 2px 10px 2px 5px; background: #000; font-size: 16px;}
+.nice-list .nice-card.nice-card-border .nice-card-content .nice-price{font-size: 14px;}
+
+.nice-list .nice-card-content{padding: 20px; overflow: hidden; position: relative;}
+.nice-list .nice-card.nice-card-simple .nice-card-content{padding: 0}
+.nice-list .nice-card.nice-card-border .nice-card-content{padding: 0}
+.nice-list .nice-card-content:hover{opacity: 0.7; -webkit-transition: all .4s ease-in-out; transition: all .4s ease-in-out;}
+.nice-list .nice-card-content .nice-title{padding: 0 0 5px 0; font-size: 28px; color: #62a7d8;}
+.nice-list .nice-card.nice-card-border .nice-title{font-size: 13px;}
+.nice-list .nice-card-content .nice-icon{font-size: 40px; color: #62a7d8; text-align: center;}
+.nice-list .nice-card-content .nice-icon:hover{opacity: 0.7; -webkit-transition: all .4s ease-in-out; transition: all .4s ease-in-out;}
+.nice-list .nice-card-content .nice-category{padding: 0 0 10px 0; font-size: 16px; color: #62a7d8; position: relative;}
+.nice-list .nice-card-content .nice-tools{padding: 0 0 10px 0; font-size: 22px; color: #62a7d8; position: relative;}
+.nice-list .nice-card-content .nice-sub-title{padding: 0 0 10px 0; font-size: 16px; font-weight: 600; color: #62a7d8;}
+.nice-list .nice-card-content .nice-description{padding: 0 0 10px 0; font-size: 12px; overflow: hidden;}
+.nice-list .nice-card-content .nice-description *{max-width: 100%;}
+.nice-list .nice-card-content .nice-description img{max-width: 100%;}
+.nice-list .nice-card-content .nice-description img.img-responsive{display:inherit;}
+
+.nice-list .nice-card .nice-title{font-size: 18px; color: #62a7d8; margin-top: auto;}
+.nice-list .nice-card .nice-sub-title{padding: 0 0 10px 0; font-size: 16px; font-weight: 600; color: #484848;}
+
+.nice-list .nice-card, .nice-list .nice-box{position: relative !important;}
+@media(max-width:767px){
+    .nice-list .nice-card.col-12, .nice-list .nice-box.col-12{width:100%}
+    .nice-list .nice-card.col-6, .nice-list .nice-box.col-6{width:calc(50% - 21px)}
+    .nice-list .nice-card.col-4, .nice-list .nice-box.col-4{width:calc(33.33333333% - 21px)}
+    .nice-list .nice-card.col-3, .nice-list .nice-box.col-3{width:calc(25% - 21px)}
+    .nice-list .nice-card.col-2, .nice-list .nice-box.col-2{width:calc(16.66666667% - 21px)}
+    .nice-list .nice-buttons .nice-button{width: 100px !important;}
+}
+@media(min-width: 768px) and (max-width:991px){
+    .nice-list .nice-card.col-sm-12, .nice-list .nice-box.col-sm-12{max-width: 100%;}
+    .nice-list .nice-card.col-sm-6, .nice-list .nice-box.col-sm-6{max-width: calc(50% - 21px);}
+    .nice-list .nice-card.col-sm-4, .nice-list .nice-box.col-sm-4{max-width: calc(33.33333333% - 21px);}
+    .nice-list .nice-card.col-sm-3, .nice-list .nice-box.col-sm-3{max-width: calc(25% - 21px);}
+    .nice-list .nice-card.col-sm-2, .nice-list .nice-box.col-sm-2{max-width: calc(16.66666667% - 21px);}
+    .nice-list .nice-buttons .nice-button{max-width:  100px !important;}
+}
+@media(min-width: 992px) and (max-width:1199px){
+    .nice-list .nice-card.col-md-12, .nice-list .nice-box.col-md-12{max-width: 100%;}
+    .nice-list .nice-card.col-md-6, .nice-list .nice-box.col-md-6{max-width: calc(50% - 21px);}
+    .nice-list .nice-card.col-md-4, .nice-list .nice-box.col-md-4{max-width: calc(33.33333333% - 21px);}
+    .nice-list .nice-card.col-md-3, .nice-list .nice-box.col-md-3{max-width: calc(25% - 21px);}
+    .nice-list .nice-card.col-md-2, .nice-list .nice-box.col-md-2{max-width: calc(16.66666667% - 21px);}
+}
+@media(min-width: 1200px){
+    .nice-list .nice-card.col-lg-12, .nice-list .nice-box.col-lg-12{max-width: 100%;}
+    .nice-list .nice-card.col-lg-6, .nice-list .nice-box.col-lg-6{max-width: calc(50% - 21px);}
+    .nice-list .nice-card.col-lg-4, .nice-list .nice-box.col-lg-4{max-width: calc(33.33333333% - 21px);}
+    .nice-list .nice-card.col-lg-3, .nice-list .nice-box.col-lg-3{max-width: calc(25% - 21px);}
+    .nice-list .nice-card.col-lg-2, .nice-list .nice-box.col-lg-2{max-width: calc(16.66666667% - 21px);}
+}
+
+/*.nice-list .nice-card.featured:after{position: absolute; width: 100px; color: #fff; font-size: 10px; text-align: center; content: "destacado"; top: 0; right: 0; text-transform: uppercase; font-weight: 700; line-height: 16px; background: #62a7d8; overflow: hidden;}*/
+/*.nice-list .nice-card.active:after{position: absolute; width: 100px; color: #fff; font-size: 10px; text-align: center; content: "activo"; top: 0; right: 0; text-transform: uppercase; font-weight: 700; line-height: 16px; background: green; overflow: hidden;}*/
+/*.nice-list .nice-card.inactive:after{position: absolute; width: 100px; color: #fff; font-size: 10px; text-align: center; content: "inactivo"; top: 0; right: 0; text-transform: uppercase; font-weight: 700; line-height: 16px; background: red; overflow: hidden;}*/
+.nice-list .nice-card.featured:after{position: absolute; top: 20px; width: 100px; -webkit-transform: rotate(405deg); transform: rotate(405deg); color: #fff; font-size: 10px; text-align: center; content: "destacado"; right: -22px; text-transform: uppercase; font-weight: 700; line-height: 16px; background: #62a7d8; overflow: hidden;}
+.nice-list .nice-card.active:after{position: absolute; top: 20px; width: 100px; -webkit-transform: rotate(405deg); transform: rotate(405deg); color: #fff; font-size: 10px; text-align: center; content: "activo"; right: -22px; text-transform: uppercase; font-weight: 700; line-height: 16px; background: green; overflow: hidden;}
+.nice-list .nice-card.inactive:after{position: absolute; top: 20px; width: 100px; -webkit-transform: rotate(405deg); transform: rotate(405deg); color: #fff; font-size: 10px; text-align: center; content: "inactivo"; right: -22px; text-transform: uppercase; font-weight: 700; line-height: 16px; background: red; overflow: hidden;}
+.nice-list .nice-card.success:after{position: absolute; top: 20px; width: 100px; -webkit-transform: rotate(405deg); transform: rotate(405deg); color: #fff; font-size: 10px; text-align: center; content: "activo"; right: -22px; text-transform: uppercase; font-weight: 700; line-height: 16px; background: green; overflow: hidden;}
+.nice-list .nice-card.muted:after{position: absolute; top: 20px; width: 100px; -webkit-transform: rotate(405deg); transform: rotate(405deg); color: #484848; font-size: 10px; text-align: center; content: "inactivo"; right: -22px; text-transform: uppercase; font-weight: 700; line-height: 16px; background: #eaeaea; overflow: hidden;}
+.nice-list .nice-card.danger:after{position: absolute; top: 20px; width: 100px; -webkit-transform: rotate(405deg); transform: rotate(405deg); color: #fff; font-size: 10px; text-align: center; content: "rechazado"; right: -22px; text-transform: uppercase; font-weight: 700; line-height: 16px; background: red; overflow: hidden;}
+.nice-list .nice-card.warning:after{position: absolute; top: 20px; width: 100px; -webkit-transform: rotate(405deg); transform: rotate(405deg); color: #8a6d3b; font-size: 10px; text-align: center; content: "pendiente"; right: -22px; text-transform: uppercase; font-weight: 700; line-height: 16px; background: #fcf8e3; overflow: hidden;}
+
+.nice-list .nice-box.ok:after{position: absolute; top: 20px; width: 100px; -webkit-transform: rotate(405deg); transform: rotate(405deg); color: #fff; font-size: 10px; text-align: center; content: "OK"; right: -22px; text-transform: uppercase; font-weight: 700; line-height: 16px; background: green; overflow: hidden;}
+.nice-list .nice-box.pending:after{position: absolute; top: 20px; width: 100px; -webkit-transform: rotate(405deg); transform: rotate(405deg); color: #fff; font-size: 10px; text-align: center; content: "Pendiente"; right: -22px; text-transform: uppercase; font-weight: 700; line-height: 16px; background: orange; overflow: hidden;}
+
+
+/*
+*   NICE CARDS VARIANT
+*/
+.nice-list-variant .nice-card-variant{padding: 40px 40px 60px 40px; text-align: center; background-color: #888;}
+.nice-list-variant .nice-card-variant .title a{color: #fff; font-size: 18px;}
+.nice-list-variant .nice-card-variant .title{color: #fff; font-size: 18px;}
+.nice-list-variant .nice-card-variant .date{color: #fff; font-size: 14px;}
+.nice-list-variant .nice-card-variant .nice-buttons{position: absolute; bottom: 30px; width: calc(100% - 80px);}
+
+/*
+*   FORMS
+*/
+@media(min-width: 768px){
+    .nice-form{border-radius: 5px;}
+}
+.nice-form .form-title{border-top-left-radius: 5px; border-top-right-radius: 5px; text-align: center;}
+.nice-form .form-title h1{font-size: 20px; font-weight: 600;}
+
+/*
+*   NICE LOGO
+*/
+.nice-list.nice-logos{display: flex; flex-wrap: wrap; justify-content: center;}
+.nice-list.nice-logos .nice-logo{flex: 1 0 21%; margin: 5px; padding: 10px; border: 1px solid #eaeaea; background: #fff; box-shadow: 0px 0px 10px rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: center;}
+.nice-logo img{max-width: 100%; max-height: 100px;}
+

@@ -1,0 +1,225 @@
+var months = new Array ("Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre");
+var shortMonths = new Array ("Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic");
+var days = new Array("Lunes","Martes","Miércoles","Jueves","Viernes","Sábado","Domingo");
+var shortDays = new Array("Lun","Mar","Mie","Jue","Vie","Sab","Dom");
+
+/**
+ * @name	:	replaceAll
+ * @author	:	ppumarino
+ * @desc	:	replace all ocurrences of "search" for "replacement" in the selected string variable
+ * @params	:	search, replacement
+ */
+String.prototype.replaceAll = function(search, replacement) {
+    var target = this;
+    return target.split(search).join(replacement);
+};
+
+/**
+ * @name	:	formatDate
+ * @author	:	ppumarino
+ * @desc	:	recieves a string or a date variable and returns a date with the desired format
+ * @params	:	value, format, ifNull, ifUndefined
+ */
+function formatDate(value,format,ifNull,ifUndefined){
+    //if value is undefined or null
+    if(!ifNull)
+        ifNull = '-';
+    if(!ifUndefined)
+        ifUndefined = '-';
+    if(typeof value === 'undefined')
+        return ifUndefined;
+    if(value === null)
+        return ifNull;
+
+    if(format == 'ddddMMMMyyyy'){ //11 de Abril, 2016
+        if(value.length >= 10){
+            var month = parseInt(value.substring(5,7))-1;
+            var day = parseInt(value.substring(8,10));
+            var year = parseInt(value.substring(0,4));
+
+            return day + ' de ' + months[month] + ', ' + year;
+        }
+    }else if(format == 'DDddMMMM'){ //Viernes 11 de Abril
+        if(value.length >= 10){
+            var date = new Date(value);
+            var month = parseInt(value.substring(5,7))-1;
+            var day = parseInt(value.substring(8,10));
+            var dayOfWeek = date.getDay();
+
+            return days[dayOfWeek] + ' ' + day + ' de ' + months[month];
+        }
+    }else if(format == 'DDddMMMMYYYYhhmm'){ //Viernes 11 de Abril 2016, 14:30
+        if(typeof value.getMonth === 'function'){
+            var date = days[value.getDay()-1] + ' ' + twoDigit(value.getDate()) + ' de ' + months[value.getMonth()] + ' ' + value.getFullYear() + ', ' + value.getHours() + ':' + twoDigit(value.getMinutes());
+            return date;
+        }
+    }else if(format == 'Dddmm'){ //Vie 11/04
+        if(value.length >= 10){
+            var date = new Date(value);
+            var month = parseInt(value.substring(5,7))-1;
+            var day = parseInt(value.substring(8,10));
+            var dayOfWeek = date.getDay();
+
+            return shortDays[dayOfWeek] + ' ' + day + '/' + (month+1);
+        }
+    }else if(format == 'DddMM'){ //Vie 11/04
+        if(value.length >= 10){
+            var date = new Date(value);
+            var month = parseInt(value.substring(5,7))-1;
+            var day = parseInt(value.substring(8,10));
+            var dayOfWeek = date.getDay();
+
+            return shortDays[dayOfWeek] + ' ' + day + ' ' + shortMonths[month];
+        }
+    }else if(format == 'ddddMMMMyyyyhhmm'){ //11 de Abril, 2016, 13:00
+        if(value.length >= 16){
+            var month = parseInt(value.substring(5,7))-1;
+            var day = parseInt(value.substring(8,10));
+            var year = parseInt(value.substring(0,4));
+            var time = value.substring(11,16);
+
+            return day + ' de ' + months[month] + ', ' + year + ', ' + time;
+        }
+    }else if(format == 'YYYYmmdd'){ //2016-08-12
+        if(value.length >= 10){
+            var month = parseInt(value.substring(5,7))-1;
+            var day = parseInt(value.substring(8,10));
+            var year = parseInt(value.substring(0,4));
+
+            return year + '-' + month + '-' + day;
+        }
+    }else{ //in any other case (ex: format undefined) return the date as it came
+        return value;
+    }
+}
+
+/**
+ * @name	: formatNumber
+ * @author	: ppumarino
+ * @desc	: recieves a number variable and returns a string the desired format
+ * @params	: value, prefix, sufix, thousandsSeparator, decimalSeparator, decimalPrecision, ifNull, ifUndefined
+ */
+function formatNumber(value, decimalPrecision, prefix, sufix, thousandsSeparator, decimalSeparator, ifNull, ifUndefined){
+    //if value is undefined or null
+    if(!ifNull)
+        ifNull = '-';
+    if(!ifUndefined)
+        ifUndefined = '-';
+    if(typeof value === 'undefined')
+        return ifUndefined;
+    if(value === null)
+        return ifNull;
+
+    var toReturn = '';
+
+    if(!thousandsSeparator)
+        thousandsSeparator = '';
+
+    if(!decimalSeparator){
+        if(thousandsSeparator != ','){
+            decimalSeparator = ',';
+        }else{
+            decimalSeparator = '.';
+        }
+    }
+
+    //Format number with thousandsSeparator, decimalSeparator and decimalPrecision
+    value = value.toString(); //converts the number into a string variable to work proccess it
+    var length = value.length;
+    var decimalPosition = value.indexOf('.');
+    var integers = '';
+    var decimals = '';
+    if(decimalPosition > 0){
+        integers = value.substring(0,decimalPosition);
+        decimals = value.substring(decimalPosition + 1, length);
+    }else{
+        integers = value.substring(0,length);
+    }
+
+    //INTEGERS
+    var result = '';
+    var integersLength;
+
+    //CHECK NEGATIVE
+    var sign = '';
+    if(integers.substring(0,1) === '-'){
+        sign = '-';
+        integers = integers.substring(1);
+    }
+    while(integers.length > 3){
+        integersLength = integers.length;
+        result = thousandsSeparator + integers.substring(integersLength - 3) + result;
+        integers = integers.substring(0, integersLength - 3);
+    }
+    toReturn = sign + integers + result;
+
+    //DECIMALS
+    if(decimals.length > 0){
+        if(typeof decimalPrecision === 'undefined' || typeof decimalPrecision === null){
+            toReturn = toReturn + decimalSeparator + decimals;
+        }else{
+            if(parseInt(decimalPrecision)>0){
+                toReturn = toReturn + decimalSeparator + decimals.substring(0,decimalPrecision);
+            }
+        }
+    }
+
+    //PREFIX
+    if(prefix)
+        toReturn = prefix + toReturn;
+
+    //SUFIX
+    if(sufix)
+        toReturn = toReturn + sufix;
+
+    return toReturn;
+}
+
+/**
+ * @name	: formatBoolean
+ * @author	: ppumarino
+ * @desc	: recieves a boolean variable and depending if the value is true, false, null or undefined sends different outputs
+ * @params	: value, ifTrue, ifFalse, ifNull, ifUndefined
+ */
+function formatBoolean(value, ifTrue, ifFalse, ifNull, ifUndefined){
+    if(!ifTrue)
+        ifTrue = 'true';
+    if(!ifFalse)
+        ifFalse = 'false';
+    if(!ifNull)
+        ifNull = '-';
+    if(!ifUndefined)
+        ifUndefined = '-';
+
+    if(typeof value === 'undefined')
+        return ifUndefined;
+    else if(value === null)
+        return ifNull;
+
+    value = parseBoolean(value);
+
+    if(value == true)
+        return ifTrue;
+    else
+        return ifFalse;
+}
+
+function twoDigit(value){
+    return value < 10 ? "0"+value:value;
+}
+
+function removeDots(input){
+    if(input.length > 0) {
+        var str = new String(input.val());
+        var strNoDots = str.split('.').join('');
+        input.val(strNoDots);
+    }
+}
+
+function removeCommas(input){
+    if(input.length > 0) {
+        var str = new String(input.val());
+        var strNoDots = str.split(',').join('');
+        input.val(strNoDots);
+    }
+}

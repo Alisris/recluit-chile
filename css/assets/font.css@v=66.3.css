@@ -1,0 +1,21 @@
+@font-face {
+    font-family: 'Campton';
+    src: url('https://reqlut2.s3.sa-east-1.amazonaws.com/reqlut-images/fonts/campton/campton-Medium.ttf') format('opentype');
+}
+
+@font-face {
+    font-family: 'Campton';
+    font-weight: bold;
+    src: url('https://reqlut2.s3.sa-east-1.amazonaws.com/reqlut-images/fonts/campton/campton-Bold.ttf') format('opentype');
+}
+
+@font-face {
+    font-family: 'Outer Sans';
+    src: url('https://reqlut2.s3.sa-east-1.amazonaws.com/reqlut-images/fonts/outer_sans/Outer Sans Regular.otf') format('opentype');
+}
+
+@font-face {
+    font-family: 'Outer Sans';
+    font-weight: bold;
+    src: url('https://reqlut2.s3.sa-east-1.amazonaws.com/reqlut-images/fonts/outer_sans/Outer Sans Bold.otf') format('opentype');
+}

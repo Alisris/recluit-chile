@@ -1,0 +1,2437 @@
+$(document).ready(function(){
+    $('.btn').button();
+
+    var salaries = $('.salary');
+    salaries.keyup(function(){
+        addDots(this);
+    });
+    salaries.focusout(function(){
+        addDots(this);
+    });
+
+    InitiateToolTips();
+
+    loadFormValidation();
+
+    $('.custom-switch').bootstrapSwitch();
+
+    $mainModal = new bootstrap.Modal(document.getElementById('main_modal'), {
+        keyboard: true
+    });
+
+    $('#main_modal').on('hidden.bs.modal', function() { $('#header-logo').focus(); });
+
+    // RIAH
+    $('.riah-btn-check').on('click', function() {
+        var value = $(this).val();
+        var id = $(this).data('id');
+
+        $.ajax({
+            url: Routing.generate('user_jobs_riah_check', {'jobOfferId' : id, 'value' : value}),
+            type: "GET",
+            success: function (response) {
+                if(response.message && response.message !== '') {
+                    flashMessages({'type': 'success', 'message': response.message });
+                }
+            },
+            error: function(xhr, status, error) {
+                console.log(xhr.responseText);
+            }
+        });
+    });
+});
+
+var $mainModal;
+
+function loadFormValidation(){
+        'use strict';
+        var forms = document.querySelectorAll('.needs-validation');
+        Array.prototype.slice.call(forms)
+        .forEach(function (form) {
+            form.addEventListener('submit', function (event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+}
+
+function loadTinyMce(container, language, height){
+    tinymce.init({
+        selector: container,
+        language: language,
+        height: height,
+        branding: false,
+        imagetools_cors_hosts: ['picsum.photos'],
+        sandbox_iframes : false,
+        plugins: [
+            'advlist', 'autolink', 'link', 'image', 'lists', 'charmap', 'preview', 'anchor', 'pagebreak', 'searchreplace', 'wordcount', 'visualblocks', 'code', 'fullscreen', 'insertdatetime', 'media', 'table', 'emoticons', 'help'
+        ],
+        font_formats: "Andale Mono=andale mono,times; Arial=arial,helvetica,sans-serif; Arial Black=arial black,avant garde; Book Antiqua=book antiqua,palatino; Comic Sans MS=comic sans ms,sans-serif; Courier New=courier new,courier; Georgia=georgia,palatino; Helvetica=helvetica; Impact=impact,chicago; Symbol=symbol; Tahoma=tahoma,arial,helvetica,sans-serif; Terminal=terminal,monaco; Times New Roman=times new roman,times; Trebuchet MS=trebuchet ms,geneva; Verdana=verdana,geneva; Webdings=webdings; Wingdings=wingdings,zapf dingbats; Campton=campton; Outer Sans=Outer Sans",
+        menubar: 'file edit view insert format table',
+        toolbar: 'undo redo bold italic underline strikethrough fontselect fontsizeselect formatselect forecolor backcolor alignleft aligncenter alignright alignjustify ltr rtl | table bullist numlist outdent indent charmap emoticons | removeformat | image media link anchor table | code | fullscreen preview',
+        toolbar_sticky: true,
+        setup: function(editor) {
+            editor.on('keyup', function(e) {
+                tinyMCE.triggerSave();
+            });
+            editor.on('change', function(e) {
+                tinyMCE.triggerSave();
+            });
+            editor.on('init', function() {
+                $('.tox-statusbar__help-text').html('Presiona Alt+0 para ayuda');
+            });
+        }
+    });
+
+    // Prevent Bootstrap dialog from blocking focusin
+    document.addEventListener('focusin', (e) => {
+        if (e.target.closest(".tox-tinymce-aux, .moxman-window, .tam-assetmanager-root") !== null) {
+            e.stopImmediatePropagation();
+        }
+    });
+}
+
+function loadTinyMceMini(container, language, height){
+    tinymce.init({
+        selector: container,
+        language: language,
+        height: height,
+        menubar: '',
+        branding: false,
+        sandbox_iframes : false,
+        plugins: [
+            'advlist', 'autolink', 'link', 'image', 'lists', 'charmap', 'preview', 'anchor', 'pagebreak', 'searchreplace', 'wordcount', 'visualblocks', 'code', 'fullscreen', 'insertdatetime', 'media', 'table', 'emoticons', 'help'
+        ],
+        font_formats: "Andale Mono=andale mono,times; Arial=arial,helvetica,sans-serif; Arial Black=arial black,avant garde; Book Antiqua=book antiqua,palatino; Comic Sans MS=comic sans ms,sans-serif; Courier New=courier new,courier; Georgia=georgia,palatino; Helvetica=helvetica; Impact=impact,chicago; Symbol=symbol; Tahoma=tahoma,arial,helvetica,sans-serif; Terminal=terminal,monaco; Times New Roman=times new roman,times; Trebuchet MS=trebuchet ms,geneva; Verdana=verdana,geneva; Webdings=webdings; Wingdings=wingdings,zapf dingbats; Campton=campton; Outer Sans=Outer Sans",
+        content_css: "/css/assets/font.css",
+        toolbar: 'undo redo | link | fontsizeselect formatselect | bold italic | forecolor backcolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | removeformat | code',
+        setup: function(editor) {
+            editor.on('keyup', function(e) {
+                tinyMCE.triggerSave();
+            });
+            editor.on('change', function(e) {
+                tinyMCE.triggerSave();
+            });
+            editor.on('init', function() {
+                $('.tox-statusbar__help-text').html('Presiona Alt+0 para ayuda');
+            });
+        }
+    });
+}
+
+function speak(text){
+    if(text && text.length > 0){
+        responsiveVoice.speak(text);
+    }else{
+        console.log('Nothing to say...');
+    }
+}
+
+function ToggleLoginModal(login){
+    if(login){
+        $('#modal-inner-login').removeClass('hidden-xs');
+        $('#modal-inner-register').addClass('hidden-xs');
+    }else{
+        $('#modal-inner-login').addClass('hidden-xs');
+        $('#modal-inner-register').removeClass('hidden-xs');
+    }
+}
+
+function InitiateToolTips(){
+    $('.bubbleInfo').each(function() {
+        var distance = 10;
+        var time = 250;
+        var hideDelay = 100;
+
+        var hideDelayTimer = null;
+
+        var beingShown = false;
+        var shown = false;
+        var trigger = $('.trigger', this);
+        var info = $('.popup', this).css('opacity', 0);
+
+
+        $([trigger.get(0), info.get(0)]).click(function() {
+            if (hideDelayTimer) clearTimeout(hideDelayTimer);
+            if (beingShown || shown) {
+                // don't trigger the animation again
+                return;
+            } else {
+                // reset position of info box
+                beingShown = true;
+
+                info.css({
+                    top: 25,
+                    left: 10,
+                    display: 'block'
+                }).animate({
+                    top: '-=' + distance + 'px',
+                    opacity: 1
+                }, time, 'swing', function() {
+                    beingShown = false;
+                    shown = true;
+                });
+            }
+
+            return false;
+        }).mouseout(function() {
+            if (hideDelayTimer) clearTimeout(hideDelayTimer);
+            hideDelayTimer = setTimeout(function() {
+                hideDelayTimer = null;
+                info.animate({
+                    top: '-=' + distance + 'px',
+                    opacity: 0
+                }, time, 'swing', function() {
+                    shown = false;
+                    info.css('display', 'none');
+                });
+
+            }, hideDelay);
+
+            return false;
+        }).mouseover(function(){
+            if (hideDelayTimer) clearTimeout(hideDelayTimer);
+        });
+    });
+}
+
+function checkResponse(responseText) {
+    if (responseText.substr(0, 9).indexOf("DOCTYPE") >= 0){
+        location.reload(true);
+        return false;
+    }else{
+        return true;
+    }
+}
+
+function CleanModal(){
+    $('#pop_up_window').hide();
+    $('#loading_main_modal').show();
+}
+
+function RenderModal(response){
+    if (checkResponse(response)) {
+        var pop_up = $('#pop_up_window');
+        pop_up.html(response);
+        $('#loading_main_modal').hide();
+        pop_up.show();
+        loadFormValidation();
+        InitiateToolTips();
+        $('.btn').button();
+    }
+}
+
+function addDots(input) {
+    var str = new String(input.value);
+    var amount = str.split('.').join('');
+    amount = amount.split("").reverse();
+
+    var output = "";
+    for ( var i = 0; i <= amount.length-1; i++ ){
+        output = amount[i] + output;
+        if ((i+1) % 3 == 0 && (amount.length-1) !== i)output = '.' + output;
+    }
+    input.value = output;
+}
+
+function clearJobSearchFilters(id, index) {
+
+    var salarySelector = $('#salarySlider'+index);
+    var experienceSelector = $('#experienceSlider'+index);
+
+    var minSalary = salarySelector.slider( 'option', 'min');
+    var maxSalary = salarySelector.slider( 'option', 'max');
+    var minExperience = experienceSelector.slider( 'option', 'min');
+    var maxExperience = experienceSelector.slider( 'option', 'max');
+
+    $('#' + id)[0].reset();
+
+    $('#' + id + ' :input').val('');
+    if(typeof $.fn.selectize === 'function') {
+        $('#Search').find('.selectized').each(function (index, element) {
+            if(element.selectize){
+                element.selectize.clear();
+            }
+        });
+    }
+    // if($('#' + id + ' .selectized').length > 0 && typeof $.fn.select === 'function'){
+    //     $('#' + id + ' .selectized').each(function(){
+    //         $(this)[0].selectize.clear();
+    //     });
+    // }
+
+    experienceSelector.slider( 'option', 'values', [ minExperience , maxExperience ] );
+    salarySelector.slider( 'option', 'values', [ minSalary, maxSalary ] );
+
+    $('#minSalaryLabel').html('$'+filterAddComas(minSalary));
+    $('#maxSalaryLabel').html('$'+filterAddComas(maxSalary));
+    $('#minSalaryVal').val(minSalary);
+    $('#maxSalaryVal').val(maxSalary);
+
+    $('#minExperienceLabel').html(experienceName(minExperience));
+    $('#maxExperienceLabel').html(experienceName(maxExperience));
+    $('#minExperienceVal').val(minExperience);
+    $('#maxExperienceVal').val(maxExperience);
+
+    $('.joboffertype-card').removeClass('active');
+    $('#jobOfferType_label_').addClass('active');
+
+    $('.jobcategory-card').removeClass('active');
+    $('#jobCategory_label_').addClass('active');
+}
+
+function filterAddComas(str) {
+    var str = new String(str);
+    var amount = str.split(',').join('');
+    amount = amount.split('').reverse();
+
+    var output = '';
+    for ( var i = 0; i <= amount.length-1; i++ ){
+        output = amount[i] + output;
+        if ((i+1) % 3 == 0 && (amount.length-1) !== i)output = ',' + output;
+    }
+    return output;
+}
+
+function OpenFeedbackForm(){
+    CleanModal();
+    $mainModal.show();
+    $.ajax({
+        url: Routing.generate('user_home_feedback'),
+        type: "GET",
+        success: function(response) {
+            RenderModal(response);
+        }
+    });
+}
+
+function CountryChanged(countryId, sufix = ''){
+    if(countryId) {
+        var regionSelect = $("#regionSelect" + sufix);
+        regionSelect.prop("disabled", true);
+        var hasRegionSelectized = false;
+        if(regionSelect.hasClass('selectized')){
+            regionSelect.selectize()[0].selectize.destroy();
+            hasRegionSelectized = true;
+        }
+        regionSelect.empty();
+
+        var townshipSelect = $("#townshipSelect" + sufix);
+        townshipSelect.prop("disabled", true);
+        var hasTownshipSelectized = false;
+        if(townshipSelect.hasClass('selectized')){
+            townshipSelect.selectize()[0].selectize.destroy();
+            hasTownshipSelectized = true;
+        }
+        townshipSelect.empty();
+
+        var districtSelect = $("#districtSelect" + sufix);
+        var existDistrict = false;
+        if(districtSelect.length > 0) existDistrict = true;
+        if(existDistrict) {
+            districtSelect.prop("disabled", true);
+            var hasDistrictSelectized = false;
+            if(districtSelect.hasClass('selectized')){
+                districtSelect.selectize()[0].selectize.destroy();
+                hasDistrictSelectized = true;
+            }
+            districtSelect.empty();
+        }
+
+        $.getJSON(
+            Routing.generate('core_main_country_changed', { countryId : countryId }),
+            function(data, textStatus, jqXHR) {
+                $.each(data.regions, function(i, region) {
+                    regionSelect.append('<option value="' + region.id + '">' + region.name + '</option>');
+                });
+
+                $.each(data.townships, function(i, township) {
+                    townshipSelect.append('<option value="' + township.id + '">' + township.name + '</option>');
+                });
+
+                regionSelect.prop("disabled", false);
+                if(hasRegionSelectized) regionSelect.selectize();
+                townshipSelect.prop("disabled", false);
+                if(hasTownshipSelectized) townshipSelect.selectize();
+
+                if(existDistrict) {
+                    if(data.districts.length > 0) {
+                        $.each(data.districts, function(i, district) {
+                            districtSelect.append('<option value="' + district.id + '">' + district.name + '</option>');
+                        });
+                        districtSelect.prop("disabled", false);
+                        if(hasDistrictSelectized) districtSelect.selectize();
+
+                        districtSelect.attr('required', 'required');
+                        $('#divDistrict').removeClass('visually-hidden');
+                    } else {
+                        districtSelect.removeAttr('required');
+                        $('#divDistrict').addClass('visually-hidden');
+                    }
+                }
+            }
+        );
+    }
+}
+
+function CountryChangedFilters(countryId){
+    var regionSelect = $("#regionSelect");
+    regionSelect.prop("disabled", true);
+    var hasRegionSelectized = false;
+    if(regionSelect.hasClass('selectized')){
+        regionSelect.selectize()[0].selectize.destroy();
+        hasRegionSelectized = true;
+    }
+    regionSelect.empty();
+
+    var townshipSelect = $("#townshipSelect");
+    townshipSelect.prop("disabled", true);
+    var hasTownshipSelectized = false;
+    if(townshipSelect.hasClass('selectized')){
+        townshipSelect.selectize()[0].selectize.destroy();
+        hasTownshipSelectized = true;
+    }
+    townshipSelect.empty();
+
+    regionSelect.append('<option value="">Seleccionar</option>');
+    townshipSelect.append('<option value="">Seleccionar</option>');
+    if(countryId) {
+        $.getJSON(
+            Routing.generate('core_main_country_changed', {countryId: countryId}),
+            function (data, textStatus, jqXHR) {
+                $.each(data.regions, function (i, region) {
+                    regionSelect.append('<option value="' + region.id + '">' + region.name + '</option>');
+                });
+
+                $.each(data.townships, function (i, township) {
+                    townshipSelect.append('<option value="' + township.id + '">' + township.name + '</option>');
+                });
+            }
+        );
+    }
+    regionSelect.prop("disabled", false);
+    if(hasRegionSelectized) regionSelect.selectize();
+    townshipSelect.prop("disabled", false);
+    if(hasTownshipSelectized) townshipSelect.selectize();
+}
+
+function RegionChanged(regionId, update, sufix = ''){
+    var updateSelect = true;
+    if(typeof update != 'undefined'){
+        updateSelect = update;
+    }
+
+    if(regionId) {
+        var townshipSelect = $("#townshipSelect" + sufix);
+        townshipSelect.prop("disabled", true);
+        var hasSelectized = false;
+        if(townshipSelect.hasClass('selectized')){
+            townshipSelect.selectize()[0].selectize.destroy();
+            hasSelectized = true;
+        }
+        townshipSelect.empty();
+
+        var districtSelect = $("#districtSelect" + sufix);
+        var existDistrict = false;
+        if(districtSelect.length > 0) existDistrict = true;
+        if(existDistrict) {
+            districtSelect.prop("disabled", true);
+            var hasDistrictSelectized = false;
+            if(districtSelect.hasClass('selectized')){
+                districtSelect.selectize()[0].selectize.destroy();
+                hasDistrictSelectized = true;
+            }
+            districtSelect.empty();
+        }
+
+        $.getJSON(
+            Routing.generate('core_main_region_changed', { regionId : regionId }),
+            function(data, textStatus, jqXHR) {
+                townshipSelect.append('<option value="">Seleccionar</option>');
+                $.each(data.townships, function(i, township) {
+                    townshipSelect.append('<option value="' + township.id + '">' + township.name + '</option>');
+                });
+                townshipSelect.prop("disabled", false);
+                if(hasSelectized) townshipSelect.selectize();
+
+                if(existDistrict) {
+                    if(data.districts.length > 0) {
+                        districtSelect.append('<option value="">Seleccionar</option>');
+                        $.each(data.districts, function(i, district) {
+                            districtSelect.append('<option value="' + district.id + '">' + district.name + '</option>');
+                        });
+                        districtSelect.prop("disabled", false);
+                        if(hasDistrictSelectized) districtSelect.selectize();
+
+                        districtSelect.attr('required', 'required');
+                        $('#divDistrict').removeClass('visually-hidden');
+                    } else {
+                        districtSelect.removeAttr('required');
+                        $('#divDistrict').addClass('visually-hidden');
+                    }
+                }
+            }
+        );
+    }
+}
+
+function RegionChangedTarget(regionId, update, townshipSelect){
+    var updateSelect = true;
+    if(typeof update != 'undefined'){
+        updateSelect = update;
+    }
+
+    if(regionId) {
+        townshipSelect.prop("disabled", true);
+        var hasSelectized = false;
+        if(townshipSelect.hasClass('selectized')){
+            townshipSelect.selectize()[0].selectize.destroy();
+            hasSelectized = true;
+        }
+        townshipSelect.empty();
+
+        $.getJSON(
+            Routing.generate('core_main_region_changed', { regionId : regionId }),
+            function(data, textStatus, jqXHR) {
+                townshipSelect.append('<option value="">Seleccionar</option>');
+                $.each(data.townships, function(i, township) {
+                    townshipSelect.append('<option value="' + township.id + '">' + township.name + '</option>');
+                });
+                townshipSelect.prop("disabled", false);
+                if(hasSelectized) townshipSelect.selectize();
+            }
+        );
+    }
+}
+
+function RegionChangedMultiple(regions, townshipSelect){
+    var hasSelectized = false;
+    if(townshipSelect.hasClass('selectized')){
+        townshipSelect.selectize()[0].selectize.destroy();
+        hasSelectized = true;
+    }
+    if(regions && regions.length > 0) {
+        townshipSelect.prop("disabled", true);
+
+        townshipSelect.empty();
+
+        $.getJSON(
+            Routing.generate('core_main_region_changed_multiple', { regions : regions }),
+            function(data, textStatus, jqXHR) {
+                townshipSelect.append('<option></option>');
+                $.each(data.townships, function(i, township) {
+                    townshipSelect.append('<option value="' + township.id + '">' + township.name + '</option>');
+                });
+                townshipSelect.prop("disabled", false);
+                if(hasSelectized) townshipSelect.selectize();
+
+            }
+        );
+    }else{
+        townshipSelect.empty();
+        if(hasSelectized){
+            townshipSelect.selectize();
+        }
+    }
+}
+
+function TownshipChanged(townshipId, update, sufix = ''){
+    var updateSelect = true;
+    if(typeof update != 'undefined'){
+        updateSelect = update;
+    }
+
+    if(townshipId) {
+        var districtSelect = $("#districtSelect" + sufix);
+        var existDistrict = false;
+        if(districtSelect.length > 0) existDistrict = true;
+        if(existDistrict) {
+            districtSelect.prop("disabled", true);
+            var hasDistrictSelectized = false;
+            if(districtSelect.hasClass('selectized')){
+                districtSelect.selectize()[0].selectize.destroy();
+                hasDistrictSelectized = true;
+            }
+            districtSelect.empty();
+        }
+
+        $.getJSON(
+            Routing.generate('core_main_township_changed', { townshipId : townshipId }),
+            function(data, textStatus, jqXHR) {
+                if(existDistrict) {
+                    if(data.districts.length > 0) {
+                        districtSelect.append('<option value="">Seleccionar</option>');
+                        $.each(data.districts, function(i, district) {
+                            districtSelect.append('<option value="' + district.id + '">' + district.name + '</option>');
+                        });
+                        districtSelect.prop("disabled", false);
+                        if(hasDistrictSelectized) districtSelect.selectize();
+
+                        districtSelect.attr('required', 'required');
+                        $('#divDistrict').removeClass('visually-hidden');
+                    } else {
+                        districtSelect.removeAttr('required');
+                        $('#divDistrict').addClass('visually-hidden');
+                    }
+                }
+            }
+        );
+    }
+}
+
+function JobAreaChanged(jobAreaId){
+    if(jobAreaId) {
+        var jobTypeSelect = $("#jobTypeSelect");
+        jobTypeSelect.prop("disabled", true);
+
+        var hasSelectized = false;
+        if(jobTypeSelect.hasClass('selectized')){
+            jobTypeSelect.selectize()[0].selectize.destroy();
+            hasSelectized = true;
+        }
+        jobTypeSelect.empty();
+
+        $.getJSON(
+            Routing.generate('core_main_job_area_changed', { jobAreaId: jobAreaId }),
+            function(data, textStatus, jqXHR) {
+                jobTypeSelect.append('<option value="">No hay selección</option>');
+                $.each(data.jobTypes, function(i, jobType) {
+                    jobTypeSelect.append('<option value="' + jobType.id + '">' + jobType.name + '</option>');
+                });
+                jobTypeSelect.prop("disabled", false);
+                if(hasSelectized) jobTypeSelect.selectize();
+
+                if(typeof JobOfferTypeChanged === 'function' && $('#jobOfferTypeSelect').length > 0){
+                    JobOfferTypeChanged($('#jobOfferTypeSelect').val());
+                }
+            }
+        );
+    }
+}
+
+function JobAreaChangedFilters(jobAreaId){
+    var jobTypeSelect = $("#jobTypeSelect");
+    jobTypeSelect.prop("disabled", true);
+    var hasSelectized = false;
+    if(jobTypeSelect.hasClass('selectized')){
+        jobTypeSelect.selectize()[0].selectize.destroy();
+        hasSelectized = true;
+    }
+    jobTypeSelect.empty();
+
+    jobTypeSelect.append('<option value="">No hay selección</option>');
+    if(jobAreaId) {
+        $.getJSON(
+            Routing.generate('core_main_job_area_changed', { jobAreaId: jobAreaId }),
+            function(data, textStatus, jqXHR) {
+                $.each(data.jobTypes, function(i, jobType) {
+                    jobTypeSelect.append('<option value="' + jobType.id + '">' + jobType.name + '</option>');
+                });
+                jobTypeSelect.prop("disabled", false);
+                if(hasSelectized) jobTypeSelect.selectize();
+
+            }
+        );
+    }
+    else {
+        jobTypeSelect.prop("disabled", false);
+        if(hasSelectized){
+            jobTypeSelect.selectize();
+        }
+    }
+}
+
+function JobOfferGenericCareerFacultyChanged(facultyId, index){
+    // if(facultyId){
+        var genericCareerSelect = $('#genericCareerSelect_' + index);
+        genericCareerSelect.prop("disabled", true);
+        var hasSelectized = false;
+        if(genericCareerSelect.hasClass('selectized')){
+            genericCareerSelect.selectize()[0].selectize.destroy();
+            hasSelectized = true;
+        }
+        genericCareerSelect.empty();
+
+        $.getJSON(
+            Routing.generate('core_main_faculty_changed', { facultyId: facultyId }),
+            function(data) {
+                genericCareerSelect.append('<option>Carrera...</option>')
+                $.each(data.genericCareers, function(i, genericCareer) {
+                    genericCareerSelect.append('<option value="' + genericCareer.id + '">' + genericCareer.name + '</option>');
+                });
+                genericCareerSelect.prop("disabled", false);
+                if(hasSelectized) genericCareerSelect.selectize();
+
+            }
+        );
+    // }
+}
+
+function JobOfferGenericCareerSetFaculty(genericCareerId,index){
+    if(genericCareerId){
+        var facultySelect = $('#genericCareerFacultySelect_' + index);
+        var genericCareerSelect = $('#genericCareerSelect_' + index);
+        facultySelect.prop("disabled", true);
+        genericCareerSelect.prop("disabled", true);
+
+        var hasSelectized = false;
+        if(genericCareerSelect.hasClass('selectized')){
+            genericCareerSelect.selectize()[0].selectize.destroy();
+            hasSelectized = true;
+        }
+        genericCareerSelect.empty();
+
+        var hasFacultySelectized = false;
+        if(facultySelect.hasClass('selectized')){
+            facultySelect.selectize()[0].selectize.destroy();
+            hasFacultySelectized = true;
+        }
+
+        $.getJSON(
+            Routing.generate('core_main_set_faculty', { genericCareerId: genericCareerId }),
+            function(data, textStatus, jqXHR) {
+                facultySelect.val(data.facultyId);
+                genericCareerSelect.append('<option>Carrera...</option>')
+                $.each(data.genericCareers, function(i, genericCareer) {
+                    genericCareerSelect.append('<option value="' + genericCareer.id + '">' + genericCareer.name + '</option>');
+                });
+                genericCareerSelect.val(genericCareerId);
+                genericCareerSelect.prop("disabled", false);
+                facultySelect.prop("disabled", false);
+                if(hasSelectized) genericCareerSelect.selectize();
+                if(hasFacultySelectized) facultySelect.selectize();
+            }
+        );
+    }
+}
+
+function isInclusiveChange(isInclusive){
+    if(isInclusive){
+        $('#inclusion').removeClass('visually-hidden');
+        $('#inclusiveDescription').attr('required', 'required');
+    }else{
+        $('#inclusion').addClass('visually-hidden');
+        $('#inclusiveDescription').attr('required', false);
+        $('#inclusiveDescription').val('');
+    }
+}
+
+function attentionTypeChange(attentionType){
+    if(attentionType == 4){
+        $('#externalLinkField').removeClass('visually-hidden');
+        $('#externalLink').attr('required', 'required');
+    }else{
+        $('#externalLinkField').addClass('visually-hidden');
+        $('#externalLink').attr('required', false);
+        $('#externalLink').val('');
+    }
+}
+
+function hasExternalLinkChange(attentionType){
+    if(attentionType == 1){
+        $('#externalLinkField').removeClass('visually-hidden');
+        $('#externalLink').attr('required', 'required');
+    }else{
+        $('#externalLinkField').addClass('visually-hidden');
+        $('#externalLink').attr('required', false);
+        $('#externalLink').val('');
+    }
+}
+
+function SelectJobOfferTypeFilter(entity, jobOfferTypeId){
+    $('#'+entity+'_jobOfferType').val(jobOfferTypeId);
+    $('#' + entity).submit();
+}
+
+function JobOfferTypeSearchChanged(jobOfferTypeId, search){
+    if(search == true) {
+        $('#jobOfferType').find('.btn.active').removeClass('active');
+        $('#jobOfferType_' + jobOfferTypeId).parent().addClass('active');
+    }
+
+    if(jobOfferTypeId == ''){
+        jobOfferTypeId = -1;
+    }
+}
+
+function SelectJobCategoryFilter(entity, jobCategoryId){
+    $('#'+entity+'_jobCategory').val(jobCategoryId);
+    $('#' + entity).submit();
+}
+
+function JobCategoryChanged(jobCategoryId, search){
+    if(search === true) {
+        $('#jobCategory').find('.btn.active').removeClass('active');
+        $('#jobCategory_' + jobCategoryId).parent().addClass('active');
+    }
+
+    if(jobCategoryId === ''){
+        jobCategoryId = -1;
+    }
+    $.getJSON(
+        Routing.generate('core_main_jobcategory_changed', { jobCategoryId: jobCategoryId }),
+        function(data, textStatus, jqXHR) {
+            var habilitiesSelect = $('#habilitiesSelect');
+            habilitiesSelect.prop("disabled", true);
+            var hasSelectized = false;
+            if(habilitiesSelect.hasClass('selectized')){
+                habilitiesSelect.selectize()[0].selectize.destroy();
+                hasSelectized = true;
+            }
+            habilitiesSelect.empty();
+            habilitiesSelect.append('<option value="">Todas</option>');
+            $.each(data.habilities, function(i, hability) {
+                habilitiesSelect.append('<option value="' + hability.id + '">' + hability.name + '</option>');
+            });
+            habilitiesSelect.prop("disabled", false);
+            if(hasSelectized) habilitiesSelect.selectize();
+        }
+    );
+}
+
+function MainCheckCompany(entity){
+    var companyName = $('#'+entity+'_companyName').val();
+    if(companyName.length > 0) {
+        $.ajax({
+            url: Routing.generate('core_main_check_company', {'companyName': encodeURIComponent(companyName)}),
+            type: "GET",
+            success: function(response) {
+                if (response.valid) HideMoreCompany(entity, false);
+                else ShowMoreCompany(entity);
+            }
+        });
+    }else HideMoreCompany(entity, true);
+}
+
+function HideMoreCompany(entity, required){
+    $('#more_company').addClass('visually-hidden');
+    $('#more_company').find('.glyphicon').removeClass('glyphicon-remove');
+    $('#'+entity+'_sector').val($("#target option:first").val());
+    $('#'+entity+'_sector').prop('required', required);
+}
+
+function ShowMoreCompany(entity){
+    $('#more_company').removeClass('visually-hidden');
+    $('#'+entity+'_sector').prop('required', true);
+}
+
+function MainCheckUniversity(entity){
+    var universityName = $('#' + entity + '_universityName').val();
+    var countryId = $('#' + entity + '_country').val();
+    if(universityName.length > 5) {
+        $.ajax({
+            url: Routing.generate('core_main_check_university', {'universityName': encodeURIComponent(universityName), 'countryId' : countryId}),
+            type: "GET",
+            success: function(response) {
+                if (response.valid) {
+                    // La universidad existe
+                    $('#' + entity + '_country').val(response.countryId); // Asigna el country_id recibido
+                    // El campo de país permanece habilitado
+                }
+                // No deshabilitamos el campo de país
+            }
+        });
+    }
+}
+
+function MainCheckHability(entity){
+    var habilityName = $('#'+entity+'_habilityName').val();
+    if(habilityName.length > 0) {
+        $.ajax({
+            url: Routing.generate('core_main_check_hability', {'habilityName': encodeURIComponent(habilityName)}),
+            type: "GET",
+            success: function(response) {
+                if (response.valid) HideMoreHability(entity, false);
+                else ShowMoreHability(entity);
+            }
+        });
+    }else HideMoreHability(entity, true);
+}
+
+function HideMoreHability(entity, required){
+    $('#more_hability').addClass('visually-hidden');
+    $('#more_hability').find('.glyphicon').removeClass('glyphicon-remove');
+    $('#'+entity+'_jobCategory').val($("#target option:first").val());
+    $('#'+entity+'_jobCategory').prop('required', required);
+}
+
+function ShowMoreHability(entity){
+    $('#more_hability').removeClass('visually-hidden');
+    $('#'+entity+'_jobCategory').prop('required', true);
+}
+
+function CerrarVisorPortafolio(){
+    $('body').css('overflow', 'auto');
+
+    var pelicula = document.getElementById('pelicula_portafolio');
+    var pop_up = document.getElementById('portafolio');
+    $(pelicula).hide();
+
+    pop_up.style.display = 'none';
+    pop_up.innerHTML = '';
+}
+
+function OpenVisorPortafolio(){
+    $('body').css('overflow', 'hidden');
+
+    var pelicula = document.getElementById('pelicula_portafolio');
+    var pop_up = document.getElementById('portafolio');
+    pop_up.style.top = (10)+'px';
+    pelicula.style.top = '0px';
+    $(pelicula).fadeIn(100);
+    pop_up.style.display = 'block';
+    pop_up.innerHTML = '<div style="text-align: center; margin-top:150px; margin-bottom:90px;">Cargando...<a onclick="CerrarVisorPortafolio()"><img style="padding-top:8px;" src="//reqlut2.s3.amazonaws.com/images/iconos/close_portafolio.png"/></a></div>';
+}
+
+function ShowPortfolio(userId){
+    OpenVisorPortafolio();
+    $.ajax({
+        url: Routing.generate('core_main_show_portfolio', { 'userId' : userId }),
+        type: "GET",
+        success: function(response) {
+            if (checkResponse(response)) {
+                $('#portafolio').html(response);
+            }
+        }
+    });
+}
+
+function ShowItem(t, itemId){
+    $('.thumb').removeClass('current');
+    $(t).addClass('current');
+    document.getElementById("visor").innerHTML = '<div style="margin-left:460px; margin-top:100px; margin-bottom:90px;">Cargando...<a onclick="CerrarVisorPortafolio()"><img style="padding-top:8px;" src="//reqlut2.s3.amazonaws.com/images/iconos/close_portafolio.png"/></a></div>';
+
+    $.ajax({
+        url: Routing.generate('core_main_show_item_portfolio', { 'itemId' : itemId }),
+        type: "GET",
+        success: function(response) {
+            if (checkResponse(response)) {
+                $('#visor').html(response);
+            }
+        }
+    });
+}
+
+function ShowMicroCompanyPortfolio(companyId){
+    OpenVisorPortafolio();
+    $.ajax({
+        url: Routing.generate('core_main_show_microcompany_portfolio', { 'companyId' : companyId }),
+        type: "GET",
+        success: function(response) {
+            if (checkResponse(response)) {
+                $('#portafolio').html(response);
+            }
+        }
+    });
+}
+
+function ShowMicroCompanyItem(t, itemId){
+    $('.thumb').removeClass('current');
+    $(t).addClass('current');
+    document.getElementById("visor").innerHTML = '<div style="margin-left:460px; margin-top:100px; margin-bottom:90px;">Cargando...<a onclick="CerrarVisorPortafolio()"><img style="padding-top:8px;" src="//reqlut2.s3.amazonaws.com/images/iconos/close_portafolio.png"/></a></div>';
+
+    $.ajax({
+        url: Routing.generate('core_main_show_microcompany_item_portfolio', { 'itemId' : itemId }),
+        type: "GET",
+        success: function(response) {
+            if (checkResponse(response)) {
+                $('#visor').html(response);
+            }
+        }
+    });
+}
+
+function formatRut(input){
+    input.blur(function(){
+        if(typeof $(this).val() !== 'undefined' && $(this).val() != null ){
+            var value = $(this).val().trim().toUpperCase().replaceAll('.','').replaceAll(',','').replaceAll('-','');
+            var digit = value.substr(0, value.length - 1);
+            var number = formatNumber(digit, $(this));
+            if(number != ''){
+                $(this).val(number + '-' + value.charAt(value.length - 1));
+            }
+        }
+    });
+}
+
+function ToggleRegister(value){
+    if(value){
+        $('#con_reqlut').show();
+        $('#sin_reqlut').hide();
+    }else{
+        $('#sin_reqlut').show();
+        $('#con_reqlut').hide();
+    }
+}
+
+function ValidUsername(value) {
+    if (/^((([a-zA-Z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+(\.([a-zA-Z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+)*)|((\x22)((((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(([\x01-\x08\x0b\x0c\x0e-\x1f\x7f]|\x21|[\x23-\x5b]|[\x5d-\x7e]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(\\([\x01-\x09\x0b\x0c\x0d-\x7f]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]))))*(((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(\x22)))@((([a-zA-Z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-zA-Z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-zA-Z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-zA-Z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.)+(([a-zA-Z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-zA-Z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-zA-Z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-zA-Z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.?$/.test(value)){
+        return true;
+    } else {
+        return false;
+    }
+}
+
+function CheckCompanyUser(tokens){
+    var username = $('#email').val().toLowerCase();
+    $('#email').val(username);
+    var oldEmail = $('#email').data('email');
+    var token = 'reqlut';
+    if(tokens !== null && tokens.length > 0){
+        var token = tokens.shift();
+    }
+
+    if(username != oldEmail) {
+        $('#email').data('email',username);
+        $('#company_user_fields').html('');
+        $('#company_user_password').html('');
+        $('#portal-register-container').addClass('visually-hidden');
+
+        if (ValidUsername(username)) {
+            $('#check_username').addClass('visually-hidden');
+            $('#submit_register').show();
+            $.ajax({
+                url: Routing.generate('company_auth_check_username', {'username': username, 'token' : token}),
+                type: "GET",
+                success: function(response) {
+                    if (response.result == 'USER_EXIST') {
+                        $('#company_user_password').html(response.html);
+                    } else if (response.result == 'USER_NOT_EXIST') {
+                        $('#company_user_fields').html(response.html);
+                        intlPhoneInput('#cellphone', 'Info[cellphone]');
+                        $('#contactPhone').val($('#phone').val());
+                    } else if (response.result == 'REACHED_MAX_ATTEMPTS') {
+                        $('#company_user_fields').html(response.html);
+                    }
+                    $('#portal-register-container').removeClass('visually-hidden');
+                    InitiateToolTips();
+                }
+            });
+        } else {
+            $('#check_username').removeClass('visually-hidden');
+        }
+    }
+}
+
+function CheckCompanyUserAdmin(){
+    var username = $('#email').val().toLowerCase();
+    $('#email').val(username);
+    var oldEmail = $('#email').data('email');
+    if(username != oldEmail) {
+        $('#email').data('email',username);
+        $('#company_user_fields').html('');
+        $('#company_user_password').html('');
+        $('#portal-register-container').addClass('visually-hidden');
+
+        if (ValidUsername(username)) {
+            $('#check_username').addClass('visually-hidden');
+            $('#submit_register').show();
+            $.ajax({
+                url: Routing.generate('alumni_admin_company_register_check_username', {'username': username}),
+                type: "GET",
+                success: function(response) {
+                    if (response.result == 'USER_EXIST') {
+                        $('#company_user_password').html(response.html);
+                    } else if (response.result == 'USER_NOT_EXIST') {
+                        $('#company_user_fields').html(response.html);
+                        intlPhoneInput('#cellphone','Info[cellphone]');
+                        $('#cellphone').val($('#phone').val());
+                    }
+                    $('#portal-register-container').removeClass('visually-hidden');
+                    InitiateToolTips();
+                }
+            });
+        } else {
+            $('#check_username').removeClass('visually-hidden');
+        }
+    }
+}
+
+
+function OpenAddCompanyUserForm(){
+    CleanModal();
+    $.ajax({
+        url: Routing.generate('company_my_add_user_access_form'),
+        type: "GET",
+        success: function(response) {
+            RenderModal(response);
+            $mainModal.show();
+        }
+    });
+}
+
+function CheckMyCompanyUser(){
+    var username = $('#email').val();
+    var position = $('#position').val();
+    $('#company_user_fields').html('');
+    $('#portal-register-btn').addClass('visually-hidden');
+
+    if(ValidUsername(username) && position.length > 0){
+        $('.check_username').addClass('visually-hidden');
+        $('#submit_register').show();
+        $.ajax({
+            url: Routing.generate('company_my_check_username', { 'username' : username }),
+            type: "GET",
+            success: function(response) {
+                $('#company_user_fields').html(response);
+                $('#portal-register-btn').removeClass('visually-hidden');
+                InitiateToolTips();
+            }
+        });
+    }else{
+        $('.check_username').removeClass('visually-hidden');
+    }
+}
+
+function AlumniOpenAddCompanyUserForm(companyId){
+    CleanModal();
+    $.ajax({
+        url: Routing.generate('alumni_admin_add_user_access_form', { 'companyId' : companyId }),
+        type: "GET",
+        success: function(response) {
+            RenderModal(response);
+            $mainModal.show();
+        }
+    });
+}
+
+function AlumniChangeUsernameForm(authId){
+    CleanModal();
+    $.ajax({
+        url: Routing.generate('alumni_admin_change_username_form', { 'authId' : authId}),
+        type: "GET",
+        success: function(response) {
+            RenderModal(response);
+            $mainModal.show();
+        }
+    });
+}
+
+function AlumniCheckMyCompanyUser(){
+    var username = $('#email').val();
+    var position = $('#position').val();
+    $('#company_user_fields').html('');
+    $('#portal-register-btn').addClass('visually-hidden');
+    $('#send_email').removeClass('visually-hidden');
+
+    if(ValidUsername(username) && position.length > 0){
+        $('.check_username').addClass('visually-hidden');
+        $('#submit_register').show();
+        $.ajax({
+            url: Routing.generate('alumni_admin_check_username', { 'username' : username }),
+            type: "GET",
+            success: function(response) {
+                $('#company_user_fields').html(response);
+                $('#portal-register-btn').removeClass('visually-hidden');
+                InitiateToolTips();
+            }
+        });
+    }else{
+        $('.check_username').removeClass('visually-hidden');
+    }
+}
+
+function UltronChangeUsernameForm(authId){
+    CleanModal();
+    $.ajax({
+        url: Routing.generate('ultron_users_change_username_form', { 'authId' : authId}),
+        type: "GET",
+        success: function(response) {
+            RenderModal(response);
+
+            $mainModal.show();
+        }
+    });
+}
+
+function UltronOpenAddCompanyUserForm(companyId){
+    CleanModal();
+    $.ajax({
+        url: Routing.generate('ultron_companies_add_user_access_form', { 'companyId' : companyId }),
+        type: "GET",
+        success: function(response) {
+            RenderModal(response);
+
+            $mainModal.show();
+        }
+    });
+}
+
+function UltronCheckMyCompanyUser(){
+    var username = $('#email').val();
+    $('#company_user_fields').html('');
+    $('#portal-register-btn').addClass('visually-hidden');
+
+    if(ValidUsername(username)){
+        $('#check_username').addClass('visually-hidden');
+        $('#submit_register').show();
+        $.ajax({
+            url: Routing.generate('ultron_companies_check_username', { 'username' : username }),
+            type: "GET",
+            success: function(response) {
+                $('#company_user_fields').html(response);
+                $('#portal-register-btn').removeClass('visually-hidden');
+                InitiateToolTips();
+            }
+        });
+    }else{
+        $('#check_username').removeClass('visually-hidden');
+    }
+}
+
+function OpenAddUltronAdminAlumniForm(portalId, userId){
+    CleanModal();
+
+    var url = "";
+    if(userId) url = Routing.generate('ultron_alumnis_admin_form', { 'portalId' : portalId, 'userId' : userId });
+    else url = Routing.generate('ultron_alumnis_admin_form', { 'portalId' : portalId });
+
+    $.ajax({
+        url: url,
+        type: "GET",
+        success: function(response) {
+            RenderModal(response);
+
+            $mainModal.show();
+        }
+    });
+}
+
+function OpenAddAdminAlumniForm(userId){
+    CleanModal();
+
+    var url = "";
+    if(userId) url = Routing.generate('alumni_admin_maintain_admin_form', { 'userId' : userId });
+    else url = Routing.generate('alumni_admin_maintain_admin_form');
+
+    $.ajax({
+        url: url,
+        type: "GET",
+        success: function(response) {
+            RenderModal(response);
+
+            $mainModal.show();
+        }
+    });
+}
+
+function UltronCheckAdminUser(){
+    var username = $('#username').val();
+    $('#admin_user_fields').html('');
+
+    if(ValidUsername(username)){
+        $('.check_username').addClass('visually-hidden');
+        $.ajax({
+            url: Routing.generate('ultron_alumnis_check_admin', { 'portalId' : portalId, 'username' : username }),
+            type: "GET",
+            success: function(response) {
+                if(response.success == true){
+                    $('#admin_user_fields').html(response.html);
+                    $('#register-btn').removeAttr('disabled');
+                    InitiateToolTips();
+                }else{
+                    flashMessages({'type': 'error', 'message': response.message });
+                }
+            }
+        });
+    }else{
+        $('.check_username').removeClass('visually-hidden');
+    }
+}
+
+function AlumniCheckAdminUser(portalId){
+    var username = $('#username').val();
+    $('#admin_user_fields').html('');
+
+    if(ValidUsername(username)){
+        $('.check_username').addClass('visually-hidden');
+        $.ajax({
+            url: Routing.generate('alumni_admin_maintain_check_admin', { 'username' : username }),
+            type: "GET",
+            success: function(response) {
+                if(response.success == true){
+                    $('#admin_user_fields').html(response.html);
+                    $('#register-btn').removeAttr('disabled');
+                    InitiateToolTips();
+                }else{
+                    flashMessages({'type': 'error', 'message': response.message });
+                }
+            }
+        });
+    }else{
+        $('.check_username').removeClass('visually-hidden');
+    }
+}
+
+function OpenAddFaireAdminForm(expoId){
+    CleanModal();
+    $.ajax({
+        url: Routing.generate('ultron_faires_add_admin', { expoId : expoId }),
+        type: "GET",
+        success: function(response) {
+            RenderModal(response);
+
+            $mainModal.show();
+        }
+    });
+}
+
+function ToggleJobOfferMenu(){
+    var menu = $('#job_offer_menu');
+    if(menu.hasClass('hidden-xs')) menu.removeClass('hidden-xs');
+    else menu.addClass('hidden-xs');
+}
+
+function FiltroMovimientos(filtro, link){
+    $('.link_paso').removeClass('current');
+    $(link).addClass('current');
+    $('.f0').hide();
+    $('.f'+filtro).show();
+}
+
+function ViewApplicationAnswersByUser(applicationId){
+    CleanModal();
+
+    $mainModal.show();
+    $.ajax({
+        url:   Routing.generate('user_account_applications_answers', { 'applicationId' : applicationId }),
+        type:  "GET",
+        success:  function(response) {
+            RenderModal(response);
+        }
+    });
+}
+
+function ViewApplicationInterviewDetails(applicationId){
+    CleanModal();
+
+    $mainModal.show();
+    $.ajax({
+        url:   Routing.generate('user_account_applications_interviews', { 'applicationId' : applicationId }),
+        type:  "GET",
+        success:  function(response) {
+            RenderModal(response);
+        }
+    });
+}
+
+function OpenUserProfile(userId, hash, applicationId, userJobCategoryId){
+    CleanModal();
+    $.ajax({
+        url: Routing.generate('company_talents_user_profile', { 'userId' : userId, 'hash' : hash, 'applicationId' : applicationId, 'userJobCategoryId' : userJobCategoryId}),
+        type: "GET",
+        success: function(response) {
+            if(response.message && response.message !== '') {
+                flashMessages({'type': 'error', 'message': response.message });
+            } else {
+                RenderModal(response);
+                $mainModal.show();
+                $mainModal.handleUpdate();
+            }
+        },
+        error: function(xhr, status, error) {
+            console.log(xhr.responseText);
+        }
+    });
+}
+
+function OpenStudentProfile(studentId, portalSubId){
+    CleanModal();
+    $.ajax({
+        url: Routing.generate('alumni_admin_student_profile', { 'studentId' : studentId, 'portalSubId' : portalSubId }),
+        type: "GET",
+        success: function(response) {
+            RenderModal(response);
+            $mainModal.show();
+            $mainModal.handleUpdate();
+        },
+        error: function(xhr, status, error) {
+            console.log(xhr.responseText);
+        }
+    });
+}
+
+function OpenStudentProfileAssociate(studentId, portalSubId){
+    CleanModal();
+    $.ajax({
+        url: Routing.generate('associates_student_profile', { 'studentId' : studentId, 'portalSubId' : portalSubId }),
+        type: "GET",
+        success: function(response) {
+            RenderModal(response);
+            $mainModal.show();
+            $mainModal.handleUpdate();
+        },
+        error: function(xhr, status, error) {
+            console.log(xhr.responseText);
+        }
+    });
+}
+
+function OpenUserJobCategory(userId, hash, applicationId, userJobCategoryId){
+    CleanModal();
+    $.ajax({
+        url: Routing.generate('company_talents_user_job_category', { 'userId' : userId, 'hash' : hash, 'applicationId' : applicationId, 'userJobCategoryId' : userJobCategoryId }),
+        type: "GET",
+        success: function(response) {
+            RenderModal(response);
+
+            $mainModal.show();
+            $mainModal.handleUpdate();
+        },
+        error: function(xhr, status, error) {
+            console.log(xhr.responseText);
+        }
+    });
+}
+
+function OpenContactProfile(userId, hash, applicationId, userJobCategoryId){
+    CleanModal();
+    $.ajax({
+        url: Routing.generate('company_talents_contact_profile', { 'userId' : userId, 'hash' : hash, 'applicationId' : applicationId, 'userJobCategoryId' : userJobCategoryId }),
+        type: "GET",
+        success: function(response) {
+            RenderModal(response);
+
+            $mainModal.show();
+            $mainModal.handleUpdate();
+        },
+        error: function(xhr, status, error) {
+            console.log(xhr.responseText);
+        }
+    });
+}
+
+function OpenAnswersProfile(applicationId){
+    CleanModal();
+    $.ajax({
+        url: Routing.generate('company_talents_answers_profile', { 'applicationId' : applicationId }),
+        type: "GET",
+        success: function(response) {
+            RenderModal(response);
+
+            $mainModal.show();
+            $mainModal.handleUpdate();
+        },
+        error: function(xhr, status, error) {
+            console.log(xhr.responseText);
+        }
+    });
+}
+
+function ShowScholarshipInfo(userId, hash, applicationId){
+    CleanModal();
+    $.ajax({
+        url: Routing.generate('company_talents_scholarship_info', { 'userId' : userId, 'hash' : hash, 'applicationId' : applicationId }),
+        type: "GET",
+        success: function(response) {
+            RenderModal(response);
+
+            $mainModal.show();
+            $mainModal.handleUpdate();
+        },
+        error: function(xhr, status, error) {
+            console.log(xhr.responseText);
+        }
+    });
+}
+
+function ShowTestInfo(userId, hash, applicationId){
+    CleanModal();
+    $.ajax({
+        url: Routing.generate('company_talents_test_info', { 'userId' : userId, 'hash' : hash, 'applicationId' : applicationId }),
+        type: "GET",
+        success: function(response) {
+            RenderModal(response);
+
+            $mainModal.show();
+            $mainModal.handleUpdate();
+        },
+        error: function(xhr, status, error) {
+            console.log(xhr.responseText);
+        }
+    });
+}
+
+function OpenUserHistory(userId, applicationId, userJobCategoryId){
+    CleanModal();
+    $.ajax({
+        url: Routing.generate('company_talents_user_history', { 'applicationId' : applicationId, 'userId' : userId, 'userJobCategoryId' : userJobCategoryId}),
+        type: "GET",
+        success: function(response) {
+            RenderModal(response);
+
+            $mainModal.show();
+            $mainModal.handleUpdate();
+        },
+        error: function(xhr, status, error) {
+            console.log(xhr.responseText);
+        }
+    });
+}
+
+function OpenUserCvPdfUploaded(userId, hash, applicationId, userJobCategoryId){
+    CleanModal();
+    $.ajax({
+        url: Routing.generate('company_talents_user_cv_pdf_uploaded', { 'userId' : userId, 'hash' : hash, 'applicationId' : applicationId, 'userJobCategoryId' : userJobCategoryId }),
+        type: "GET",
+        success: function(response) {
+            RenderModal(response);
+
+            $mainModal.show();
+            $mainModal.handleUpdate();
+        },
+        error: function(xhr, status, error) {
+            console.log(xhr.responseText);
+        }
+    });
+}
+
+function ShowApplicationReferences(applicationId){
+    CleanModal();
+    $.ajax({
+        url: Routing.generate('company_talents_application_references', { 'applicationId' : applicationId }),
+        type: "GET",
+        success: function(response) {
+            RenderModal(response);
+
+            $mainModal.show();
+            $mainModal.handleUpdate();
+            bindToggleable('toggle-handle','toggleable',true, true, true);
+        },
+        error: function(xhr, status, error) {
+            console.log(xhr.responseText);
+        }
+    });
+}
+
+function Invite(guestUserId, jobOfferId){
+    $.ajax({
+        url: Routing.generate('company_job_invite', { 'jobOfferId' : jobOfferId, 'guestUserId' : guestUserId}),
+        type: "GET",
+        success: function(response) {
+            if(response.valid){
+                $('#invite_'+guestUserId).addClass('visually-hidden');
+                $('#invited_'+guestUserId).removeClass('visually-hidden');
+            }else{
+                $('#invite_'+guestUserId).html('error');
+            }
+        },
+        error: function(xhr, status, error) {
+            console.log(xhr.responseText);
+        },
+        dataType: "JSON"
+    });
+}
+
+function ToggleCheckBoxes(checkbox, inputName){
+    if($(checkbox).is(":checked")) {
+        $('input[name=' + inputName + '\\[\\]]').each(function(i, el) {
+            $(el).prop('checked', true);
+        });
+    }else{
+        $('input[name=' + inputName + '\\[\\]]').each(function(i, el) {
+            $(el).prop('checked', false);
+        });
+    }
+}
+
+function CheckSelectedUsers(){
+    var valid = false;
+    $('input[name=userIds\\[\\]]').each(function(i, el) {
+        if($(el).prop('checked')){
+            valid = true;
+            return;
+        }
+    });
+    if(valid){
+        $('#many_action_error').addClass('visually-hidden');
+        return true;
+    }else{
+        $('#many_action_error').removeClass('visually-hidden');
+        return false;
+    }
+}
+
+function CheckSelectedUsersBootstrapTable(tableId){
+    var selected = $('#' + tableId).bootstrapTable('getSelections');
+    var valid = selected.length > 0;
+    if(valid){
+        $('#many_action_error').addClass('visually-hidden');
+        return true;
+    }else{
+        $('#many_action_error').html('Seleccione al menos un postulante');
+        $('#many_action_error').removeClass('visually-hidden');
+        return false;
+    }
+}
+
+function ShowHideManyAction(){
+    var actionType = $('#actionType').val();
+    var actionMailContainer = $('#action_mail_container');
+    var actionMail = $('#action_mail');
+    var actionReferencesContainer = $('#action_references_container');
+    var actionForm = $('#action_form');
+    var actionGroupContainer = $('#action_group_container');
+    var actionGroup = $('#action_group');
+
+    actionMailContainer.addClass('visually-hidden');
+    actionMail.prop('required', false);
+    actionReferencesContainer.addClass('visually-hidden');
+    actionForm.prop('required', false);
+    actionGroupContainer.addClass('visually-hidden');
+    actionGroup.prop('required', false);
+
+    if( actionType.indexOf("group") >= 0 ) {
+        actionGroupContainer.removeClass('visually-hidden');
+        actionGroup.prop('required', true);
+    } else if( actionType.indexOf("email") >= 0 ) {
+        actionMailContainer.removeClass('visually-hidden');
+        actionMail.prop('required', true);
+    } else if(actionType === 'requestReferences') {
+        actionReferencesContainer.removeClass('visually-hidden');
+        actionForm.prop('required', true);
+    }
+}
+
+function OpenPreFinishJobOffer(jobOfferId){
+    CleanModal();
+    var route = 'company_job_pre_finish';
+    $.ajax({
+        url: Routing.generate(route, { 'jobOfferId' : jobOfferId }),
+        type: "GET",
+        success: function(response) {
+            RenderModal(response);
+
+            $mainModal.show();
+            $mainModal.handleUpdate();
+        },
+        error: function(xhr, status, error) {
+            console.log(xhr.responseText);
+        }
+    });
+}
+
+function OpenPreRepublishJobOffer(jobOfferId){
+    CleanModal();
+    var route = 'company_job_pre_republish';
+    $.ajax({
+        url: Routing.generate(route, { 'jobOfferId' : jobOfferId }),
+        type: "GET",
+        success: function(response) {
+            RenderModal(response);
+
+            $mainModal.show();
+            $mainModal.handleUpdate();
+        },
+        error: function(xhr, status, error) {
+            console.log(xhr.responseText);
+        }
+    });
+}
+
+function AdminOpenPreRepublishJobOffer(jobOfferId){
+    CleanModal();
+    $.ajax({
+        url: Routing.generate('alumni_admin_job_offer_pre_republish', { 'jobOfferId' : jobOfferId }),
+        type: "GET",
+        success: function(response) {
+            RenderModal(response);
+
+            $mainModal.show();
+            $mainModal.handleUpdate();
+        },
+        error: function(xhr, status, error) {
+            console.log(xhr.responseText);
+        }
+    });
+}
+
+function OpenUserPhotoForm(){
+    CleanModal();
+
+    $mainModal.show();
+    $.ajax({
+        url:   Routing.generate('user_account_photo_form'),
+        type:  "GET",
+        success:  function(response) {
+            RenderModal(response);
+            $('form').validator();
+            $('#User_photo').focus();
+        }
+    });
+}
+
+function OpenUserPdfForm(){
+    CleanModal();
+
+    $mainModal.show();
+    $.ajax({
+        url:   Routing.generate('user_account_pdf_form'),
+        type:  "GET",
+        success:  function(response) {
+            RenderModal(response);
+            $('form').validator();
+            $('#UserPdf_pdf').focus();
+        }
+    });
+}
+
+function OpenExpoCompanyPhotoForm(){
+    CleanModal();
+
+    $mainModal.show();
+    $.ajax({
+        url:   Routing.generate('faire_companies_photo_form'),
+        type:  "GET",
+        success:  function(response) {
+            RenderModal(response);
+            $('form').validator();
+        }
+    });
+}
+
+function OpenExpoCompanyBannerForm(bannerType){
+    CleanModal();
+
+    $mainModal.show();
+    $.ajax({
+        url:   Routing.generate('faire_companies_banner_form', { 'bannerType' : bannerType }),
+        type:  "GET",
+        success:  function(response) {
+            RenderModal(response);
+            $('form').validator();
+        }
+    });
+}
+
+function OpenAdminExpoCompanyBannerForm(companyId, bannerType){
+    CleanModal();
+
+    $mainModal.show();
+    $.ajax({
+        url:   Routing.generate('faire_admin_banner_form', { 'companyId': companyId, 'bannerType' : bannerType }),
+        type:  "GET",
+        success:  function(response) {
+            RenderModal(response);
+            $('form').validator();
+        }
+    });
+}
+
+function OpenAnswersProfileExpo(applicationId){
+    CleanModal();
+    $.ajax({
+        url: Routing.generate('faire_companies_answers', { 'applicationId' : applicationId }),
+        type: "GET",
+        success: function(response) {
+            RenderModal(response);
+
+            $mainModal.show();
+            $mainModal.handleUpdate();
+        }
+    });
+}
+
+function OpenUserProfileExpo(applicationId){
+    CleanModal();
+    $.ajax({
+        url: Routing.generate('faire_companies_profile', { 'applicationId' : applicationId }),
+        type: "GET",
+        success: function(response) {
+            RenderModal(response);
+
+            $mainModal.show();
+            $mainModal.handleUpdate();
+        }
+    });
+}
+
+function OpenContactProfileExpo(applicationId){
+    CleanModal();
+    $.ajax({
+        url: Routing.generate('faire_companies_contact', { 'applicationId' : applicationId }),
+        type: "GET",
+        success: function(response) {
+            RenderModal(response);
+
+            $mainModal.show();
+            $mainModal.handleUpdate();
+        }
+    });
+}
+
+function OpenUserCvPdfUploadedExpo(applicationId){
+    $.ajax({
+        url: Routing.generate('faire_companies_cv_pdf_uploaded', { 'applicationId' : applicationId }),
+        type: "GET",
+        success: function(response) {
+            RenderModal(response);
+
+            $mainModal.show();
+            $mainModal.handleUpdate();
+        },
+        error: function(xhr, status, error) {
+            console.log(xhr.responseText);
+        }
+    });
+}
+
+function OpenPostApplication(applicationId){
+    CleanModal();
+    $.ajax({
+        url: Routing.generate('user_account_post_application', { 'applicationId' : applicationId }),
+        type: "GET",
+        success: function(response) {
+            RenderModal(response);
+
+            $mainModal.show();
+            $mainModal.handleUpdate();
+        }
+    });
+}
+
+function ExpoOpenPostApplication(applicationId){
+    CleanModal();
+    $.ajax({
+        url: Routing.generate('faire_account_post_application', { 'applicationId' : applicationId }),
+        type: "GET",
+        success: function(response) {
+            RenderModal(response);
+
+            $mainModal.show();
+            $mainModal.handleUpdate();
+        }
+    });
+}
+
+function OpenReferenceApplication(applicationId){
+    CleanModal();
+    $.ajax({
+        url: Routing.generate('user_account_application_references', { 'applicationId' : applicationId }),
+        type: "GET",
+        success: function(response) {
+            RenderModal(response);
+
+            $mainModal.show();
+
+            var limit = 5;
+            $('input.selectedReferences').on('change', function(e){
+                var checked = $('input.selectedReferences:checked');
+                if(checked.length > limit){
+                    this.checked = false;
+                }
+            })
+        }
+    });
+}
+
+function AddSpeedUser(speedId){
+    $('#inverse-speed').html('');
+    $.ajax({
+        url: Routing.generate('faire_account_add_speed', { speedId : speedId }),
+        type: "GET",
+        success: function(response) {
+            $('#inverse-speed').html(response);
+        }
+    });
+}
+
+function AddSpeedCompany(speedId){
+    $('#inverse-speed').html('');
+    $.ajax({
+        url: Routing.generate('faire_companies_add_speed', { speedId : speedId }),
+        type: "GET",
+        success: function(response) {
+            $('#inverse-speed').html(response);
+        }
+    });
+}
+
+function OpenExpoSpeeds(){
+    $('#inverse-speed').html('');
+    $.ajax({
+        url: Routing.generate('faire_account_speeds'),
+        type: "GET",
+        success: function(response) {
+            $('#inverse-speed').html(response);
+            var modal = new bootstrap.Modal(document.getElementById('speeds_modal'), {
+                keyboard: true
+            });
+            modal.show();
+        }
+    });
+}
+
+function OpenExpoSpeedsCompany(){
+    $('#inverse-speed').html('');
+    $.ajax({
+        url: Routing.generate('faire_companies_speeds'),
+        type: "GET",
+        success: function(response) {
+            if (checkResponse(response)) {
+                $('#inverse-speed').html(response);
+                var modal = new bootstrap.Modal(document.getElementById('speeds_modal'), {
+                    keyboard: true
+                });
+                modal.show();
+            }
+        }
+    });
+}
+
+function OpenTutorialUser(){
+    $('#tutorial_modal_content').html('');
+    $.ajax({
+        url: Routing.generate('faire_home_tutorial'),
+        type: "GET",
+        success: function(response) {
+            if (checkResponse(response)) {
+                $('#tutorial_modal_content').html(response);
+                var modal = new bootstrap.Modal(document.getElementById('tutorial_modal'), {
+                    keyboard: true
+                });
+                modal.show();
+            }
+        }
+    });
+}
+
+function OpenTutorialCompany(){
+    $('#tutorial_modal_content').html('');
+
+    $.ajax({
+        url: Routing.generate('faire_companies_tutorial'),
+        type: "GET",
+        success: function(response) {
+            if (checkResponse(response)) {
+                $('#tutorial_modal_content').html(response);
+                var modal = new bootstrap.Modal(document.getElementById('tutorial_modal'), {
+                    keyboard: true
+                });
+                modal.show();
+                modal.handleUpdate();
+            }
+        }
+    });
+}
+
+function Tutorial(step){
+    $('.tutorialStep').addClass('visually-hidden');
+    $('#tutorial'+step).removeClass('visually-hidden');
+}
+
+function OpenInterviewers(){
+    CleanModal();
+    $.ajax({
+        url: Routing.generate('faire_companies_interviewers'),
+        type: "GET",
+        success: function(response) {
+            RenderModal(response);
+
+            $mainModal.show();
+            $mainModal.handleUpdate();
+        }
+    });
+}
+
+function OpenAnswersProfileExpoAdmin(applicationId){
+    CleanModal();
+    $.ajax({
+        url: Routing.generate('faire_admin_answers', { 'applicationId' : applicationId }),
+        type: "GET",
+        success: function(response) {
+            RenderModal(response);
+
+            $mainModal.show();
+            $mainModal.handleUpdate();
+        }
+    });
+}
+
+function OpenUserProfileExpoAdmin(applicationId){
+    CleanModal();
+    $.ajax({
+        url: Routing.generate('faire_admin_profile', { 'applicationId' : applicationId }),
+        type: "GET",
+        success: function(response) {
+            RenderModal(response);
+
+            $mainModal.show();
+            $mainModal.handleUpdate();
+        }
+    });
+}
+
+function OpenContactProfileExpoAdmin(applicationId){
+    CleanModal();
+    $.ajax({
+        url: Routing.generate('faire_admin_contact', { 'applicationId' : applicationId }),
+        type: "GET",
+        success: function(response) {
+            RenderModal(response);
+
+            $mainModal.show();
+            $mainModal.handleUpdate();
+        }
+    });
+}
+
+function OpenUserCvPdfUploadedExpoAdmin(applicationId){
+    $.ajax({
+        url: Routing.generate('faire_admin_cv_pdf_uploaded', { 'applicationId' : applicationId }),
+        type: "GET",
+        success: function(response) {
+            RenderModal(response);
+
+            $mainModal.show();
+            $mainModal.handleUpdate();
+        },
+        error: function(xhr, status, error) {
+            console.log(xhr.responseText);
+        }
+    });
+}
+
+function OpenExpoCompanyPhotoFormAdmin(companyId){
+    CleanModal();
+
+    $mainModal.show();
+    $.ajax({
+        url:   Routing.generate('faire_admin_photo_form', { 'companyId' : companyId }),
+        type:  "GET",
+        success:  function(response) {
+            RenderModal(response);
+            $('form').validator();
+        }
+    });
+}
+
+function OpenInterviewersAdmin(companyId){
+    CleanModal();
+    $.ajax({
+        url:   Routing.generate('faire_admin_interviewers', { 'companyId' : companyId }),
+        type: "GET",
+        success: function(response) {
+            RenderModal(response);
+
+            $mainModal.show();
+            $mainModal.handleUpdate();
+        }
+    });
+}
+
+function SaveHasInterviews(){
+    if($('#hasInterviews').is(':checked')) var has = 1;
+    else var has = 0;
+    $.ajax({
+        url:   Routing.generate('faire_companies_has_virtual_interviews_save', { 'value' : has }),
+        type: "GET",
+        success: function(response) {
+        }
+    });
+}
+
+function flashMessages(messages){
+    const Toast = Swal.mixin({
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true,
+        didOpen: (toast) => {
+            toast.addEventListener('mouseenter', Swal.stopTimer);
+            toast.addEventListener('mouseleave', Swal.resumeTimer);
+        }
+    });
+
+    if(typeof messages !== 'undefined' && messages != null) {
+        if (!(messages instanceof Array)) {
+            var array = [];
+            array.push(messages);
+            messages = array;
+        }
+        $.each(messages, function(key, message) {
+            Toast.fire({
+                icon: message.type,
+                title: message.message
+            });
+        });
+    }
+}
+
+function flashMessagesSticky(messages){
+    const StickyToast = Swal.mixin({
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        showCloseButton: true,
+        animation: true,
+        timer: null,
+        timerProgressBar: false,
+        didOpen: function() {
+            new ClipboardJS('#copy-btn').on('success', function(e) {
+                e.clearSelection();
+            }).on('error', function(e) {
+                console.error('Error al copiar: ', e);
+            });
+        }
+    });
+
+    if(typeof messages !== 'undefined' && messages != null) {
+        if (!(messages instanceof Array)) {
+            var array = [];
+            array.push(messages);
+            messages = array;
+        }
+        $.each(messages, function(key, message) {
+            StickyToast.fire({
+                icon: message.type,
+                title: message.message
+            });
+        });
+    }
+}
+
+async function sweetAlertConfirm(options) {
+    return await Swal.fire({
+        title: options.title,
+        // text: options.text,
+        html: options.text,
+        icon: options.icon ?? 'warning',
+        reverseButtons: true,
+        showCancelButton: true,
+        confirmButtonText: options.confirmButtonText ?? 'Sí',
+        confirmButtonAriaLabel: options.confirmButtonAriaLabel ?? 'Sí',
+        cancelButtonText: options.cancelButtonText ?? 'No',
+        cancelButtonAriaLabel: options.cancelButtonAriaLabel ?? 'No',
+        confirmButtonColor: options.confirmButtonColor ?? '#65b778',
+        cancelButtonColor: options.cancelButtonColor ?? '#c0c0c0',
+        showDenyButton: options.showDenyButton ?? false,
+        denyButtonColor: options.denyButtonColor ?? '#dc3741',
+        denyButtonText: options.denyButtonText ?? '',
+        input: options.input ?? null,
+        inputLabel: options.inputLabel ?? null,
+        inputPlaceholder: options.inputPlaceholder ?? null,
+        inputValidator: options.inputValidator ?? null,
+    }).then((result) => {
+        return result;
+    });
+}
+
+async function sweetAlertConfirmBasic(title, text) {
+    return await Swal.fire({
+        title : title,
+        html : text,
+        icon : 'warning',
+        reverseButtons: true,
+        showCancelButton: true,
+        confirmButtonText: 'Sí',
+        confirmButtonAriaLabel: 'Sí',
+        cancelButtonText: 'No',
+        cancelButtonAriaLabel: 'No',
+        confirmButtonColor: '#0000ff',
+        cancelButtonColor: '#ff0000'
+    }).then((result) => {
+        return result;
+    });
+}
+
+function sweetAlertLoading(title) {
+    Swal.fire({
+        title: title,
+        allowOutsideClick: false,
+        didOpen: () => {
+            Swal.showLoading()
+        }
+    });
+}
+
+function bindToggleable(handleClass, toggleableClass, icon, hideOthers, hideOnStart){
+    var handle = $('.' + handleClass);
+    var toggleable = $('.' + toggleableClass);
+    handle.click(function(){
+        var thisToggleable = $(this).find('.' + toggleableClass);
+        var visibleBefore = thisToggleable.is(':visible')
+        if(hideOthers == true) {
+            toggleable.not(thisToggleable).slideUp();
+        }
+        thisToggleable.slideToggle();
+
+        if(icon == true) {
+            handle.find('i').removeClass('fa-chevron-up').addClass('fa-chevron-down');
+            if(!visibleBefore){
+                $(this).find('i').removeClass('fa-chevron-down').addClass('fa-chevron-up');
+            }
+        }
+    });
+    if(hideOnStart == true) {
+        toggleable.hide();
+    }
+}
+
+function loadJs(path, callback){
+    var list = document.getElementsByTagName('script');
+    var i = list.length, flag = false;
+    while (i--) {
+        if (list[i].src === path) {
+            flag = true;
+            break;
+        }
+    }
+
+    // if we didn't already find it on the page, add it
+    if (!flag) {
+        var head = document.head || document.getElementsByTagName('head')[0];
+        var script = document.createElement('script');
+        script.src = path;
+        script.onload = callback;
+        script.onreadystatechange = function(){
+            if (this.readyState == 'complete'){
+                callback();
+            }
+        }
+        head.insertBefore(script, head.firstChild);
+    }
+}
+
+function loadCss(path){
+    var list = document.getElementsByTagName('link');
+    var i = list.length, flag = false;
+    while (i--) {
+        if (list[i].src === path) {
+            flag = true;
+            break;
+        }
+    }
+
+    // if we didn't already find it on the page, add it
+    if (!flag) {
+        var head = document.head || document.getElementsByTagName('head')[0];
+        var style = document.createElement('link');
+        style.rel = 'stylesheet'
+        style.type = 'text/css'
+        style.href = path;
+        head.insertBefore(style, head.firstChild);
+    }
+}
+
+function loadBanner(locationId, type, border){
+    var url = null;
+    if(locationId <= 0)
+        url = location.protocol + '//' + location.host + location.pathname;
+
+    $.ajax({
+        url: Routing.generate('alumni_banners', {'locationId' : locationId, 'type' : type}),
+        type: "GET",
+        data: {'url' : url},
+        success: function(response) {
+            if(response.isValid == true) {
+                if(type == 0) {
+                    $('#banner-' + locationId).html(response.html);
+                    $('#banner-' + locationId).fadeIn(3000);
+                    if(border == true) {
+                        $('#banner-' + locationId).css('padding', '10px').css('border', '1px solid #eaeaea');
+                    }
+                }else if(type == 1) {
+                    $('#banner-modal').html(response.html);
+                    openModal('banner-modal');
+                }else if(type == 2){
+                    $('#banner-inferior').html(response.html);
+                    $('#banner-inferior').fadeIn(3000);
+                }
+            }
+        }
+    });
+}
+
+// Bootstrap table
+function numberSorter(a, b) {
+    var aa = a.replace(/[^\d]/g, '');
+    var bb = b.replace(/[^\d]/g, '');
+    return aa - bb
+}
+
+// Password Requirements
+function passwordRequirements(id, special_characters) {
+    $('#' + id).PassRequirements({
+        rules: {
+            minlength: {
+                text: "Al menos tener minLength caracteres",
+                minLength: 10,
+            },
+            containSpecialChars: {
+                text: "Al menos contener minLength caracter(es) especial(es)",
+                minLength: 1,
+                regex: new RegExp("([^" + special_characters + "])", 'g')
+            },
+            containLowercase: {
+                text: "Al menos contener minLength letra(s) minúscula(s)",
+                minLength: 1,
+                regex: new RegExp('[^a-z]', 'g')
+            },
+            containUppercase: {
+                text: "Al menos contener minLength letra(s) mayúscula(s)",
+                minLength: 1,
+                regex: new RegExp('[^A-Z]', 'g')
+            },
+            containNumbers: {
+                text: "Al menos contener minLength número(s)",
+                minLength: 1,
+                regex: new RegExp('[^0-9]', 'g')
+            }
+        },
+        defaults: false,
+    });
+}
+
+function openModal(id){
+    CleanModal();
+
+    var modal = new bootstrap.Modal(document.getElementById(id), {
+        keyboard: true
+    });
+    
+    modal.show();
+    modal.handleUpdate();
+}
+
+function OpenCompanyCategoriesForm(companyId, refresh) {
+    return new Promise(function (resolve) {
+        var url = Routing.generate('alumni_admin_company_profile_categories', { 'companyId' : companyId, 'refresh' : refresh });
+        CleanModal();
+        var mainModal = new bootstrap.Modal(document.getElementById('main_modal'), {
+            keyboard: true
+        });
+        mainModal.handleUpdate();
+        mainModal.show();
+        $.ajax({
+            url: url,
+            type: "GET",
+            success: function (response) {
+                RenderModal(response);
+                resolve();
+            }
+        });
+    });
+}
+
+function OpenCompanyOwnerForm(companyId) {
+    return new Promise(function (resolve) {
+        var url = Routing.generate('alumni_admin_company_profile_owner', { 'companyId' : companyId });
+        CleanModal();
+        var mainModal = new bootstrap.Modal(document.getElementById('main_modal'), {
+            keyboard: true
+        });
+        mainModal.handleUpdate();
+        mainModal.show();
+        $.ajax({
+            url: url,
+            type: "GET",
+            success: function (response) {
+                RenderModal(response);
+                resolve();
+            }
+        });
+    });
+}
+
+function OpenJobOfferOwnerForm(jobOfferId) {
+    return new Promise(function (resolve) {
+        var url = Routing.generate('alumni_admin_joboffer_owner', { 'jobOfferId' : jobOfferId });
+        CleanModal();
+        var mainModal = new bootstrap.Modal(document.getElementById('main_modal'), {
+            keyboard: true
+        });
+        mainModal.handleUpdate();
+        mainModal.show();
+        $.ajax({
+            url: url,
+            type: "GET",
+            success: function (response) {
+                RenderModal(response);
+                resolve();
+            }
+        });
+    });
+}
+
+function loadChart(chartId, url, filterId) {
+    var spinnerHtml = '<div class="spinner-border text-primary" role="status"><span class="visually-hidden">Cargando...</span></div>';
+    var divContent = $('#' + chartId);
+    divContent.html(spinnerHtml);
+
+    $.ajax({
+        url: url,
+        type: 'GET',
+        data: $('#' + filterId).serialize(),
+        dataType: 'json',
+        success: function(response) {
+            $('#' + chartId + ' .spinner-border').remove();
+            Highcharts.chart(response.chart.renderTo, {
+                chart: response.chart,
+                title: response.title,
+                xAxis: response.xAxis,
+                yAxis: response.yAxis,
+                tooltip: response.tooltip,
+                legend: response.legend,
+                credits: response.credits,
+                plotOptions: response.plotOptions,
+                series: response.series
+            });
+        },
+        error: function() {
+            $('#' + chartId + ' .spinner-border').remove();
+            var alertHtml = '<div class="alert alert-danger alert-dismissible fade show" role="alert">No fue posible cargar el gráfico' +
+                                    '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>' +
+                                    '</div>';
+            divContent.html(alertHtml);
+        }
+    });
+}
+
+function loadStatistics(divId, url, filterId) {
+    var spinnerHtml = '<div class="spinner-border text-primary" role="status"><span class="visually-hidden">Cargando...</span></div>';
+    var divContent = $('#' + divId + ' .statisticContent');
+    divContent.append(spinnerHtml);
+
+    $.ajax({
+        url: url,
+        type: 'GET',
+        data: $('#' + filterId).serialize(),
+        dataType: 'json',
+        success: function(response) {
+            var contentHtml = '<div class="text-white"><span class="circle-tile-number metric-value">' + response.nYear + '</span><span class="metric-text">en el año</span></div>' +
+                                    '<div class="text-white"><span class="circle-tile-number metric-value">' + response.nMonth + '</span> <span class="metric-text">en el mes</span></div>';
+
+            if (response.nWeek !== null) {
+                contentHtml += '<div class="text-white"><span class="circle-tile-number metric-value">' + response.nWeek + '</span> <span class="metric-text">en la semana</span></div>';
+            }
+            divContent.html(contentHtml);
+        },
+        error: function() {
+            $('#' + divId + ' .statisticContent .spinner-border').remove();
+            var alertHtml = '<div class="alert alert-danger alert-dismissible fade show" role="alert">No fue posible cargar el contenido' +
+                                    '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>' +
+                                    '</div>';
+            divContent.html(alertHtml);
+        }
+    });
+}
+
+function isValidURL(url) {
+    var isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(url);
+    if (isEmail) {
+        return false;
+    }
+    var pattern = new RegExp('^(https?:\\/\\/)' +
+        '((([a-zA-Z\\d]([a-zA-Z\\d-]*[a-zA-Z\\d])*)\\.)+[a-zA-Z]{2,}|'+
+        '((\\d{1,3}\\.){3}\\d{1,3}))' +
+        '(\\:\\d+)?(\\/[-a-zA-Z\\d%_.~+]*)*' +
+        '(\\?[;&a-zA-Z\\d%_.~+=-]*)?' +
+        '(\\#[-a-zA-Z\\d_]*)?$', 'i');
+
+    return pattern.test(url);
+}
